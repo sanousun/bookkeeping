@@ -1,0 +1,34 @@
+def supportVersion = "25.0.1"
+def greenDAOVersion = "3.2.0"
+ext {
+
+    javaVersion = "1.8"
+
+    android = [
+            compileSdkVersion: 25,
+            buildToolsVersion: '25.0.1',
+            applicationId    : 'com.sz.bookkeeping',
+            minSdkVersion    : 21,
+            targetSdkVersion : 25,
+    ]
+
+    apkVersion = [
+            versionCode: 1,
+            versionName: '1.0',
+    ]
+
+    dependencies = [
+            "support-v4"        : "com.android.support:support-v4:${supportVersion}",
+            "appcompat-v7"      : "com.android.support:appcompat-v7:${supportVersion}",
+            "recyclerview-v7"   : "com.android.support:recyclerview-v7:${supportVersion}",
+            "cardview-v7"       : "com.android.support:cardview-v7:${supportVersion}",
+            "design"            : "com.android.support:design:${supportVersion}",
+            "rxjava"            : "io.reactivex:rxjava:1.2.3",
+            "rxandroid"         : "io.reactivex:rxandroid:1.2.1",
+            "rxbinding"         : "com.jakewharton.rxbinding:rxbinding:1.0.0",
+            "flexbox"           : "com.google.android:flexbox:0.2.4",
+            "greendao"          : "de.greenrobot:greendao:${greenDAOVersion}",
+            "greendao-generator": "de.greenrobot:greendao-generator:${greenDAOVersion}",
+            "gradle-retrolambda": "me.tatarka:gradle-retrolambda:3.3.0-beta4",
+    ]
+}
