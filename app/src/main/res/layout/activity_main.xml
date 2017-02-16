@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#AFAFAF"
     android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
@@ -12,9 +14,15 @@
 
     </android.support.v7.widget.Toolbar>
 
-
-    <android.support.v7.widget.RecyclerView
+    <com.sz.bookkeeping.calendar.widget.CalendarView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="10dp"/>
+
+    <!--<com.sz.bookkeeping.widget.CalendarView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:padding="10dp"/>-->
 
 </LinearLayout>

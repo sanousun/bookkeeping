@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:parentTag="RelativeLayout">
+
+    <LinearLayout
+        android:id="@+id/view_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="2dp"
+        tools:background="@drawable/shape_background_normal">
+
+        <ImageView
+            android:id="@+id/iv_dot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/shape_dot_normal"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/tv_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:lineSpacingMultiplier="0.9"
+            android:textSize="18sp"
+            tools:text="1"
+            tools:textColor="#373737"/>
+
+        <TextView
+            android:id="@+id/tv_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-3dp"
+            android:includeFontPadding="false"
+            android:lineSpacingMultiplier="0.9"
+            android:textSize="8sp"
+            tools:text="劳动节"
+            tools:textColor="#AFAFAF"/>
+    </LinearLayout>
+
+</merge>

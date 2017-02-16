@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:parentTag="LinearLayout">
+
+    <com.sz.bookkeeping.calendar.widget.DayView
+        android:id="@+id/view_day0"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        app:day_text="1"
+        app:desc_text="初九"
+        app:dot_color="@color/colorPrimaryDark"/>
+
+    <com.sz.bookkeeping.calendar.widget.DayView
+        android:id="@+id/view_day1"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        app:day_text="2"
+        app:desc_text="初十"
+        app:dot_color="@color/colorPrimaryDark"/>
+
+    <com.sz.bookkeeping.calendar.widget.DayView
+        android:id="@+id/view_day2"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        app:day_text="3"
+        app:desc_text="十一"
+        app:dot_color="@color/colorPrimaryDark"/>
+
+    <com.sz.bookkeeping.calendar.widget.DayView
+        android:id="@+id/view_day3"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        app:day_text="4"
+        app:desc_text="国庆节"
+        app:dot_color="@color/colorPrimaryDark"/>
+
+    <com.sz.bookkeeping.calendar.widget.DayView
+        android:id="@+id/view_day4"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        app:day_text="5"
+        app:desc_text="十三"
+        app:dot_color="@color/colorPrimaryDark"/>
+
+    <com.sz.bookkeeping.calendar.widget.DayView
+        android:id="@+id/view_day5"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        app:day_text="6"
+        app:desc_text="十四"
+        app:dot_color="@color/colorPrimaryDark"/>
+
+    <com.sz.bookkeeping.calendar.widget.DayView
+        android:id="@+id/view_day6"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        app:day_text="7"
+        app:desc_text="十五"
+        app:dot_color="@color/colorPrimaryDark"/>
+
+</merge>
