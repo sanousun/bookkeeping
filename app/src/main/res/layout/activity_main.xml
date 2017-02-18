@@ -15,14 +15,10 @@
     </android.support.v7.widget.Toolbar>
 
     <com.sz.bookkeeping.calendar.widget.CalendarView
+        android:id="@+id/view_calendar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:padding="10dp"/>
-
-    <!--<com.sz.bookkeeping.widget.CalendarView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:padding="10dp"/>-->
 
 </LinearLayout>

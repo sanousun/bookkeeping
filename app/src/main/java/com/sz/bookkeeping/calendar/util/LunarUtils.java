@@ -1,6 +1,10 @@
-package com.sz.bookkeeping.util;
+package com.sz.bookkeeping.calendar.util;
 
 import android.util.SparseArray;
+
+import com.sz.bookkeeping.calendar.manager.CalDay.Lunar;
+import com.sz.bookkeeping.calendar.manager.CalDay.Solar;
+import com.sz.bookkeeping.util.StringUtils;
 
 /**
  * Created with Android Studio.
@@ -15,6 +19,15 @@ public class LunarUtils {
     private LunarUtils() {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }
+
+    private static final String[] LUNAR_MONTH = {
+            "正", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "腊"};
+
+    private static final String[] LUNAR_DAY_HEADER = {
+            "初", "十", "廿", "卅"};
+
+    private static final String[] LUNAR_DAY_TAIL = {
+            "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"};
 
     /*
      * |----4位闰月|-------------13位1为30天，0为29天|
@@ -58,10 +71,6 @@ public class LunarUtils {
             0x105652, 0x105847, 0x105a3b, 0x105c4f, 0x105e45, 0x106039, 0x10624c, 0x106441, 0x106635, 0x106849,
             0x106a3d, 0x106c51, 0x106e47, 0x10703c, 0x10724f, 0x107444, 0x107638, 0x10784c, 0x107a3f, 0x107c53,
             0x107e48};
-
-    private static final String[] LUNAR_MONTH = {"腊", "正", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "润"};
-    private static final String[] LUNAR_DAY_HEADER = {"初", "廿", "卅"};
-    private static final String[] LUNAR_DAY_TAIL = {"一", "二", "三", "四", "五", "六", "七", "八", "九", "十"};
 
     //公历节日
     private static final String[][] FESTIVAL_S = {
@@ -139,65 +148,6 @@ public class LunarUtils {
             {"立冬", "小雪"},
             {"大雪", "冬至"}};
 
-    /**
-     * 获取二十四节气
-     *
-     * @param year  年份
-     * @param month 月份
-     * @param day   天数
-     * @return 二十四节气
-     */
-    private static String getSolarTerm(int year, int month, int day) {
-        String[][] tmp = CACHE_SOLAR_TERM.get(year);
-        if (null == tmp) {
-            tmp = mSolarTerm.buildSolarTerm(year);
-            CACHE_SOLAR_TERM.put(year, tmp);
-        }
-        String[] STOfMonth = tmp[month - 1];
-        if (Integer.valueOf(STOfMonth[0]) == day) {
-            return SOLAR_TERM[month - 1][0];
-        } else if (Integer.valueOf(STOfMonth[1]) == day) {
-            return SOLAR_TERM[month - 1][1];
-        }
-        return "";
-    }
-
-    /**
-     * 获取阴历节日
-     *
-     * @param month 阴历月份
-     * @param day   阴历天数
-     * @return 阴历节日
-     */
-    private static String getFestivalL(int month, int day) {
-        String tmp = "";
-        int[] daysInMonth = FESTIVAL_L_DATE[month - 1];
-        for (int i = 0; i < daysInMonth.length; i++) {
-            if (day == daysInMonth[i]) {
-                tmp = FESTIVAL_L[month - 1][i];
-            }
-        }
-        return tmp;
-    }
-
-    /**
-     * 获取阳历节日
-     *
-     * @param month 阳历月份
-     * @param day   阳历天数
-     * @return 阳历节日
-     */
-    private static String getFestivalS(int month, int day) {
-        String tmp = "";
-        int[] daysInMonth = FESTIVAL_S_DATE[month - 1];
-        for (int i = 0; i < daysInMonth.length; i++) {
-            if (day == daysInMonth[i]) {
-                tmp = FESTIVAL_S[month - 1][i];
-            }
-        }
-        return tmp;
-    }
-
     private static int GetBitInt(int data, int length, int shift) {
         return (data & (((1 << length) - 1) << shift)) >> shift;
     }
@@ -214,17 +164,6 @@ public class LunarUtils {
         m = (m + 9) % 12;
         y = y - m / 10;
         return 365 * y + y / 4 - y / 100 + y / 400 + (m * 306 + 5) / 10 + (d - 1);
-    }
-
-    /**
-     * @param lunarYear 农历年份
-     * @return String of Ganzhi: 甲子年 Tiangan:甲乙丙丁戊己庚辛壬癸
-     * Dizhi: 子丑寅卯辰巳无为申酉戌亥
-     */
-    public static String lunarYearToGanZhi(int lunarYear) {
-        final String[] tianGan = {"甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"};
-        final String[] diZhi = {"子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"};
-        return tianGan[(lunarYear - 4) % 10] + diZhi[(lunarYear - 4) % 12] + "年";
     }
 
     private static Solar SolarFromInt(long g) {
@@ -329,40 +268,88 @@ public class LunarUtils {
         return lunar;
     }
 
+    public static String getDescriptionOfDay(Solar solar, Lunar lunar) {
+        String result = getFestivalS(solar);
+        if (StringUtils.isNotEmpty(result)) return result;
+        result = getFestivalL(lunar);
+        if (StringUtils.isNotEmpty(result)) return result;
+        result = getSolarTerm(solar);
+        if (StringUtils.isNotEmpty(result)) return result;
+        result = getLunarString(lunar);
+        return result;
+    }
+
+    /**
+     * 获取阳历节日
+     *
+     * @param solar 阳历
+     * @return 阳历节日
+     */
+    private static String getFestivalS(Solar solar) {
+        String tmp = "";
+        int[] daysInMonth = FESTIVAL_S_DATE[solar.solarMonth - 1];
+        for (int i = 0; i < daysInMonth.length; i++) {
+            if (solar.solarDay == daysInMonth[i]) {
+                tmp = FESTIVAL_S[solar.solarMonth - 1][i];
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * 获取阴历节日
+     *
+     * @param lunar 阴历
+     * @return 阴历节日
+     */
+    private static String getFestivalL(Lunar lunar) {
+        String tmp = "";
+        int[] daysInMonth = FESTIVAL_L_DATE[lunar.lunarMonth - 1];
+        for (int i = 0; i < daysInMonth.length; i++) {
+            if (lunar.lunarDay == daysInMonth[i]) {
+                tmp = FESTIVAL_L[lunar.lunarMonth - 1][i];
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * 获取二十四节气
+     *
+     * @param solar 阳历
+     * @return 二十四节气
+     */
+    private static String getSolarTerm(Solar solar) {
+        String[][] tmp = CACHE_SOLAR_TERM.get(solar.solarYear);
+        if (null == tmp) {
+            tmp = mSolarTerm.buildSolarTerm(solar.solarYear);
+            CACHE_SOLAR_TERM.put(solar.solarYear, tmp);
+        }
+        String[] STOfMonth = tmp[solar.solarMonth - 1];
+        if (Integer.valueOf(STOfMonth[0]) == solar.solarDay) {
+            return SOLAR_TERM[solar.solarMonth - 1][0];
+        } else if (Integer.valueOf(STOfMonth[1]) == solar.solarDay) {
+            return SOLAR_TERM[solar.solarMonth - 1][1];
+        }
+        return "";
+    }
+
     /**
      * 计算出展示的农历描述字符串
      *
      * @param lunar 农历日
      * @return 字符串描述
      */
-    private static String lunarNumToStr(Lunar lunar) {
-        String result = "";
+    private static String getLunarString(Lunar lunar) {
         int day = lunar.lunarDay - 1;
         if (day == 0) {
-            if (lunar.isLeap) {
-                result = LUNAR_MONTH[12];
-            }
-            result = result + LUNAR_MONTH[lunar.lunarMonth % 12] + "月";
+            return lunar.isLeap ? "润" : "" + LUNAR_MONTH[(lunar.lunarMonth - 1) % 12] + "月";
+        } else if (day == 19) {
+            return "廿十";
+        } else if (day == 29) {
+            return "卅十";
         } else {
-            result = LUNAR_DAY_HEADER[day / 10] +
-                    LUNAR_DAY_TAIL[day % 10];
+            return LUNAR_DAY_HEADER[day / 10] + LUNAR_DAY_TAIL[day % 10];
         }
-        return result;
-    }
-
-    public static class Lunar {
-        //是否润月
-        public boolean isLeap;
-        public int lunarDay;
-        public int lunarMonth;
-        public int lunarYear;
-        public String lunarFestival;
-    }
-
-    public static class Solar {
-        public int solarDay;
-        public int solarMonth;
-        public int solarYear;
-        public String solarFestival;
     }
 }

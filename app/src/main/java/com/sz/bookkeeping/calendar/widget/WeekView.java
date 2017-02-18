@@ -5,6 +5,8 @@ import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
 import com.sz.bookkeeping.R;
+import com.sz.bookkeeping.calendar.manager.CalDay;
+import com.sz.bookkeeping.calendar.manager.CalWeek;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.List;
 
 public class WeekView extends LinearLayout {
 
+    private CalWeek mCalWeek;
     private List<DayView> mDayViews;
 
     public WeekView(Context context) {
@@ -44,5 +47,27 @@ public class WeekView extends LinearLayout {
         mDayViews.add((DayView) findViewById(R.id.view_day4));
         mDayViews.add((DayView) findViewById(R.id.view_day5));
         mDayViews.add((DayView) findViewById(R.id.view_day6));
+        if (mCalWeek != null) {
+            initData();
+        }
+    }
+
+    public CalWeek getCalWeek() {
+        return mCalWeek;
+    }
+
+    public void setCalWeek(CalWeek calWeek) {
+        mCalWeek = calWeek;
+        if (mDayViews != null && mDayViews.size() != 0) {
+            initData();
+        }
+    }
+
+    private void initData() {
+        for (int i = 0; i < mDayViews.size(); i++) {
+            DayView dayView = mDayViews.get(i);
+            CalDay calDay = mCalWeek.getDayList().get(i);
+            dayView.setCalDay(calDay);
+        }
     }
 }
