@@ -105,6 +105,21 @@ public class CalDay {
         return solar.solarMonth;
     }
 
+    public int getWeekOfMonth() {
+        Calendar calendar = solar.getCalendar();
+        calendar.setFirstDayOfWeek(Calendar.MONDAY);
+        return calendar.get(Calendar.WEEK_OF_MONTH);
+    }
+
+    public int getDayOfWeek() {
+        Calendar calendar = solar.getCalendar();
+        int day = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+        if (day == 0) {
+            day = 7;
+        }
+        return day;
+    }
+
     public static class Lunar {
         //是否润月
         public boolean isLeap;
@@ -118,6 +133,12 @@ public class CalDay {
         public int solarMonth;
         public int solarYear;
 
+        public Calendar getCalendar() {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(solarYear, solarMonth - 1, solarDay);
+            return calendar;
+        }
+
         @Override
         public String toString() {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -125,5 +146,25 @@ public class CalDay {
             calendar.set(solarYear, solarMonth - 1, solarDay);
             return sdf.format(calendar.getTime());
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null || !(obj instanceof Solar)) {
+                return false;
+            }
+            Solar solar = (Solar) obj;
+            return solar.solarDay == this.solarDay
+                    && solar.solarMonth == this.solarMonth
+                    && solar.solarYear == this.solarYear;
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof CalDay)) {
+            return false;
+        }
+        CalDay calDay = (CalDay) obj;
+        return calDay.solar.equals(solar);
     }
 }

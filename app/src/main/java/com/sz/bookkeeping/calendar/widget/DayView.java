@@ -7,9 +7,8 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sz.bookkeeping.R;
@@ -24,14 +23,14 @@ import com.sz.bookkeeping.util.SizeUtils;
  * Desc: 日历中的天视图
  */
 
-public class DayView extends LinearLayout {
+public class DayView extends RelativeLayout {
 
     private CalDay mCalDay;
 
     private TextView mDayTv;
     private TextView mDescTv;
     private ImageView mDotIv;
-    private View mBgView;
+    private ImageView mBgIv;
 
     private int dayColorSelected;
     private float dayTextSize;
@@ -58,7 +57,7 @@ public class DayView extends LinearLayout {
 
     private void initView(Context context, AttributeSet attrs) {
         inflate(context, R.layout.view_day, this);
-        mBgView = findViewById(R.id.view_bg);
+        mBgIv = (ImageView) findViewById(R.id.iv_bg);
         mDayTv = (TextView) findViewById(R.id.tv_day);
         mDescTv = (TextView) findViewById(R.id.tv_desc);
         mDotIv = (ImageView) findViewById(R.id.iv_dot);
@@ -86,7 +85,7 @@ public class DayView extends LinearLayout {
         initDotIv();
 
         bgColorToday = ta.getColor(
-                R.styleable.DayView_bg_color_today, Color.TRANSPARENT);
+                R.styleable.DayView_bg_color_today, Color.parseColor("#E7E7E7"));
         bgColorSelected = ta.getColor(
                 R.styleable.DayView_bg_color_selected, Color.parseColor("#4CAF50"));
         initBgOval();
@@ -149,40 +148,44 @@ public class DayView extends LinearLayout {
      * 初始化背景圆
      */
     private void initBgOval() {
-        if (mBgView == null) return;
+        if (mBgIv == null) return;
+        int size = SizeUtils.dp2px(getContext(), 35);
         GradientDrawable bgSelected = new GradientDrawable();
         bgSelected.setColor(bgColorSelected);
-        GradientDrawable bgNormal = new GradientDrawable();
-        bgNormal.setShape(GradientDrawable.OVAL);
         bgSelected.setShape(GradientDrawable.OVAL);
+        bgSelected.setSize(size, size);
+        GradientDrawable bgNormal = new GradientDrawable();
         if (mCalDay == null || !mCalDay.isToday()) {
             bgNormal.setColor(Color.TRANSPARENT);
         } else {
             bgNormal.setColor(bgColorToday);
         }
+        bgNormal.setShape(GradientDrawable.OVAL);
+        bgNormal.setSize(size, size);
         StateListDrawable bgDb = new StateListDrawable();
         bgDb.addState(new int[]{android.R.attr.state_selected}, bgSelected);
         bgDb.addState(new int[]{}, bgNormal);
-        mBgView.setBackground(bgDb);
+        mBgIv.setImageDrawable(bgDb);
+    }
+
+    /**
+     * 设置天数据
+     */
+    public void setCalDay(CalDay calDay) {
+        mCalDay = calDay;
+        initData();
     }
 
     public CalDay getCalDay() {
         return mCalDay;
     }
 
-    public void setCalDay(CalDay calDay) {
-        mCalDay = calDay;
-        if (mDayTv != null && mDescTv != null
-                && mDotIv != null) {
-            initData();
-        }
-    }
-
     private void initData() {
         setAlpha(mCalDay.isEnable() ? 1 : 0.3f);
         mDayTv.setText(String.valueOf(mCalDay.getSolar().solarDay));
         mDescTv.setText(mCalDay.getDayDescription());
-        mDotIv.setVisibility(mCalDay.isMarked() ? VISIBLE : GONE);
+        mDotIv.setVisibility(mCalDay.isMarked() ? VISIBLE : INVISIBLE);
         initBgOval();
     }
+
 }

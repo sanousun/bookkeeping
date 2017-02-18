@@ -6,15 +6,20 @@
     android:layout_height="match_parent"
     tools:parentTag="RelativeLayout">
 
+    <ImageView
+        android:id="@+id/iv_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:src="@drawable/shape_background_normal"/>
+
     <LinearLayout
-        android:id="@+id/view_bg"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="2dp"
-        tools:background="@drawable/shape_background_normal">
+        android:padding="2dp">
 
         <ImageView
             android:id="@+id/iv_dot"

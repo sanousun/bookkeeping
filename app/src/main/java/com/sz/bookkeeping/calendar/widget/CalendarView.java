@@ -7,9 +7,11 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.widget.FrameLayout;
 
 import com.sz.bookkeeping.R;
+import com.sz.bookkeeping.calendar.manager.CalDay;
 import com.sz.bookkeeping.calendar.manager.CalMonth;
 import com.sz.bookkeeping.calendar.manager.CalWeek;
 import com.sz.bookkeeping.util.SizeUtils;
@@ -34,12 +36,13 @@ public class CalendarView extends FrameLayout {
 
     private List<WeekView> mWeekViews;
     private CalMonth mCalMonth;
+    private CalDay mSelectDay;
     private int mMinHeight;
     private int mMaxHeight;
     private int mCurHeight;
-    private int mCurSelectWeek;
 
     private int mState;
+    private OnDayOfMonthSelectListener mOnDayOfMonthSelectListener;
 
     private GestureDetector mGestureDetector;
 
@@ -77,9 +80,83 @@ public class CalendarView extends FrameLayout {
             weekView.setLayoutParams(layoutParams);
         }
         mCurHeight = mState == STATE_MONTH ? mMaxHeight : mMinHeight;
-        mCurSelectWeek = 2;
-        if (mCalMonth != null) {
-            initData();
+        setCalMonth(mCalMonth);
+        setSelectDay(mSelectDay);
+        initListener();
+        final ViewConfiguration vc = ViewConfiguration.get(context);
+        touchSlop = vc.getScaledTouchSlop();
+    }
+
+    private int lastX;
+    private int lastY;
+    private int touchSlop;
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        boolean isIntercept = false;
+        int action = ev.getAction();
+        int currentX = (int) ev.getX();
+        int currentY = (int) ev.getY();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                isIntercept = false;//点击事件分发给子控件
+                break;
+            case MotionEvent.ACTION_MOVE:
+                int dx = currentX - lastX;
+                int dy = currentY - lastY;
+                if (Math.abs(dx) > touchSlop / 3 || Math.abs(dy) > touchSlop / 3) {//父容器拦截
+                    isIntercept = true;
+                } else {//点击事件分发给子控件
+                    isIntercept = false;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                isIntercept = false;//点击事件分发给子控件
+                break;
+        }
+        //记录上次滑动的位置
+        lastX = currentX;
+        lastY = currentY;
+        return isIntercept;
+    }
+
+    public void setOnDayOfMonthSelectListener(OnDayOfMonthSelectListener onDayOfMonthSelectListener) {
+        mOnDayOfMonthSelectListener = onDayOfMonthSelectListener;
+    }
+
+    private void initListener() {
+        for (WeekView weekView : mWeekViews) {
+            weekView.setOnDayOfWeekSelectListener(calDay -> {
+                setSelectDay(calDay);
+                if (mOnDayOfMonthSelectListener != null) {
+                    mOnDayOfMonthSelectListener.onDaySelect(calDay);
+                }
+            });
+        }
+    }
+
+    public CalDay getSelectDay() {
+        return mSelectDay;
+    }
+
+    private void setSelectDay(CalDay calDay) {
+        if (calDay == null) return;
+        mSelectDay = calDay;
+        for (WeekView weekView : mWeekViews) {
+            weekView.setSelectDay(mSelectDay);
+        }
+    }
+
+    public void setCalMonth(CalMonth calMonth) {
+        if (calMonth == null) return;
+        mCalMonth = calMonth;
+        for (int i = 0; i < mWeekViews.size(); i++) {
+            WeekView weekView = mWeekViews.get(i);
+            CalWeek calWeek = mCalMonth.getWeekList().get(i);
+            weekView.setCalWeek(calWeek);
+        }
+        if (mSelectDay == null) {
+            setSelectDay(mCalMonth.getFirstDayOfMonth());
         }
     }
 
@@ -87,24 +164,10 @@ public class CalendarView extends FrameLayout {
         return mCalMonth;
     }
 
-    public void setCalMonth(CalMonth calMonth) {
-        mCalMonth = calMonth;
-        if (mWeekViews != null && mWeekViews.size() != 0) {
-            initData();
-        }
-    }
-
-    private void initData() {
-        for (int i = 0; i < mWeekViews.size(); i++) {
-            WeekView weekView = mWeekViews.get(i);
-            CalWeek calWeek = mCalMonth.getWeekList().get(i);
-            weekView.setCalWeek(calWeek);
-        }
-    }
-
     private void layoutChild() {
+        int curSelectWeek = mSelectDay == null ? 0 : mSelectDay.getWeekOfMonth() - 1;
         int goneCount = (mMaxHeight - mCurHeight) / mMinHeight;
-        if (goneCount < mCurSelectWeek) {
+        if (goneCount < curSelectWeek) {
             int locationY = mCurHeight - mMaxHeight;
             for (int i = 0; i < mWeekViews.size(); i++) {
                 WeekView weekView = mWeekViews.get(i);
@@ -112,19 +175,19 @@ public class CalendarView extends FrameLayout {
                 locationY += mMinHeight;
             }
         } else {
-            float rate = (mCurHeight - mMinHeight) * 1.0f / (mMaxHeight - (mCurSelectWeek + 1) * mMinHeight);
+            float rate = (mCurHeight - mMinHeight) * 1.0f / (mMaxHeight - (curSelectWeek + 1) * mMinHeight);
             Log.e("xyz", "rate:" + rate);
             for (int i = 0; i < mWeekViews.size(); i++) {
                 WeekView weekView = mWeekViews.get(i);
-                if (i < mCurSelectWeek) {
+                if (i < curSelectWeek) {
                     weekView.setVisibility(GONE);
-                } else if (i == mCurSelectWeek) {
+                } else if (i == curSelectWeek) {
                     setChildLayoutY(weekView, 0);
                 } else {
                     if (rate <= 0) {
                         weekView.setVisibility(GONE);
                     } else {
-                        setChildLayoutY(weekView, (int) (mMinHeight * rate * (i - mCurSelectWeek)));
+                        setChildLayoutY(weekView, (int) (mMinHeight * rate * (i - curSelectWeek)));
                         weekView.setAlpha(rate);
                     }
                 }
@@ -208,5 +271,9 @@ public class CalendarView extends FrameLayout {
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             return super.onFling(e1, e2, velocityX, velocityY);
         }
+    }
+
+    public interface OnDayOfMonthSelectListener {
+        void onDaySelect(CalDay calDay);
     }
 }

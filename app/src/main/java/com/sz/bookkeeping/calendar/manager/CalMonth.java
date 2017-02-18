@@ -17,8 +17,12 @@ public class CalMonth {
     private static final int WEEK_IN_MONTH = 6;
 
     private List<CalWeek> mWeekList;
+    private int mYear;
+    private int mMonth;
 
     public CalMonth(int year, int month) {
+        mYear = year;
+        mMonth = month;
         mWeekList = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month - 1, 1);
@@ -39,5 +43,9 @@ public class CalMonth {
 
     public List<CalWeek> getWeekList() {
         return mWeekList;
+    }
+
+    public CalDay getFirstDayOfMonth() {
+        return new CalDay(mYear, mMonth, 1);
     }
 }

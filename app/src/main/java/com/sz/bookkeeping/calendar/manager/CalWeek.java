@@ -16,26 +16,26 @@ public class CalWeek {
     private static final int DAY_IN_WEEK = 7;
 
     private List<CalDay> mDayList;
-    private int currentM;
+    private int curMonth;
 
     public List<CalDay> getDayList() {
         return mDayList;
     }
 
-    public CalWeek(int sy, int sm, int sd, int currentM) {
-        this.currentM = currentM;
+    public CalWeek(int sy, int sm, int sd, int curMonth) {
+        this.curMonth = curMonth;
         mDayList = new ArrayList<>();
         CalDay start = new CalDay(sy, sm, sd);
         mDayList.add(start);
-//        if (start.getMonth() > currentM) {
-//            currentM = start.getMonth();
-//        } else if (start.add(DAY_IN_WEEK - 1).getMonth() < currentM) {
-//            currentM = start.add(DAY_IN_WEEK - 1).getMonth();
+//        if (start.getMonth() > curMonth) {
+//            curMonth = start.getMonth();
+//        } else if (start.add(DAY_IN_WEEK - 1).getMonth() < curMonth) {
+//            curMonth = start.add(DAY_IN_WEEK - 1).getMonth();
 //        }
-        start.setEnable(start.getMonth() == currentM);
+        start.setEnable(start.getMonth() == curMonth);
         for (int i = 0; i < DAY_IN_WEEK - 1; i++) {
             CalDay calDay = mDayList.get(i).next();
-            calDay.setEnable(calDay.getMonth() == currentM);
+            calDay.setEnable(calDay.getMonth() == curMonth);
             mDayList.add(calDay);
         }
     }
@@ -43,17 +43,21 @@ public class CalWeek {
     public CalWeek pre() {
         CalDay start = mDayList.get(0).add(-DAY_IN_WEEK);
         CalDay.Solar solar = start.getSolar();
-        return new CalWeek(solar.solarYear, solar.solarMonth, solar.solarDay, currentM);
+        return new CalWeek(solar.solarYear, solar.solarMonth, solar.solarDay, curMonth);
     }
 
     public CalWeek next() {
         CalDay start = mDayList.get(0).add(DAY_IN_WEEK);
         CalDay.Solar solar = start.getSolar();
-        return new CalWeek(solar.solarYear, solar.solarMonth, solar.solarDay, currentM);
+        return new CalWeek(solar.solarYear, solar.solarMonth, solar.solarDay, curMonth);
     }
 
     public boolean isEnable() {
-        return mDayList.get(0).getMonth() == currentM
-                && mDayList.get(DAY_IN_WEEK - 1).getMonth() == currentM;
+        return mDayList.get(0).getMonth() == curMonth
+                && mDayList.get(DAY_IN_WEEK - 1).getMonth() == curMonth;
+    }
+
+    public boolean isEndDayEnable() {
+        return mDayList.get(DAY_IN_WEEK - 1).getMonth() == curMonth;
     }
 }

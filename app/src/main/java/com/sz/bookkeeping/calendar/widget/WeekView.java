@@ -22,7 +22,10 @@ import java.util.List;
 public class WeekView extends LinearLayout {
 
     private CalWeek mCalWeek;
+    private CalDay mSelectDay;
+
     private List<DayView> mDayViews;
+    private OnDayOfWeekSelectListener mOnDayOfWeekSelectListener;
 
     public WeekView(Context context) {
         this(context, null);
@@ -47,8 +50,44 @@ public class WeekView extends LinearLayout {
         mDayViews.add((DayView) findViewById(R.id.view_day4));
         mDayViews.add((DayView) findViewById(R.id.view_day5));
         mDayViews.add((DayView) findViewById(R.id.view_day6));
-        if (mCalWeek != null) {
-            initData();
+        setCalWeek(mCalWeek);
+        setSelectDay(mSelectDay);
+        initListener();
+    }
+
+    public void setOnDayOfWeekSelectListener(OnDayOfWeekSelectListener onDayOfWeekSelectListener) {
+        mOnDayOfWeekSelectListener = onDayOfWeekSelectListener;
+    }
+
+    private void initListener() {
+        for (DayView dayView : mDayViews) {
+            dayView.setOnClickListener(view -> {
+                if (!view.isSelected()) {
+                    CalDay calDay = ((DayView) view).getCalDay();
+                    setSelectDay(calDay);
+                    if (mOnDayOfWeekSelectListener != null) {
+                        mOnDayOfWeekSelectListener.onDaySelect(calDay);
+                    }
+                }
+            });
+        }
+    }
+
+    public void setCalWeek(CalWeek calWeek) {
+        if (calWeek == null) return;
+        mCalWeek = calWeek;
+        for (int i = 0; i < mDayViews.size(); i++) {
+            DayView dayView = mDayViews.get(i);
+            CalDay calDay = mCalWeek.getDayList().get(i);
+            dayView.setCalDay(calDay);
+        }
+    }
+
+    public void setSelectDay(CalDay calDay) {
+        if (calDay == null) return;
+        mSelectDay = calDay;
+        for (DayView dayView : mDayViews) {
+            dayView.setSelected(mSelectDay.equals(dayView.getCalDay()));
         }
     }
 
@@ -56,18 +95,11 @@ public class WeekView extends LinearLayout {
         return mCalWeek;
     }
 
-    public void setCalWeek(CalWeek calWeek) {
-        mCalWeek = calWeek;
-        if (mDayViews != null && mDayViews.size() != 0) {
-            initData();
-        }
+    public CalDay getSelectDay() {
+        return mSelectDay;
     }
 
-    private void initData() {
-        for (int i = 0; i < mDayViews.size(); i++) {
-            DayView dayView = mDayViews.get(i);
-            CalDay calDay = mCalWeek.getDayList().get(i);
-            dayView.setCalDay(calDay);
-        }
+    public interface OnDayOfWeekSelectListener {
+        void onDaySelect(CalDay calDay);
     }
 }

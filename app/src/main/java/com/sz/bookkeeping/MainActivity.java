@@ -15,5 +15,8 @@ public class MainActivity extends AppCompatActivity {
         CalendarView calendarView = (CalendarView) findViewById(R.id.view_calendar);
         CalMonth calMonth = new CalMonth(2017, 2);
         calendarView.setCalMonth(calMonth);
+//        calendarView.setOnDayOfMonthSelectListener(calDay -> {
+//            Log.e("xyz", calDay.getSolar().toString());
+//        });
     }
 }
