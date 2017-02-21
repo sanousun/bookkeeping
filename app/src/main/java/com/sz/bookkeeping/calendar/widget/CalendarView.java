@@ -220,12 +220,10 @@ public class CalendarView extends FrameLayout {
                     if (!mWeekViews.contains(mLastWeekView)) {
                         mWeekViews.add(mLastWeekView);
                     }
-                    mLastWeekView.setVisibility(VISIBLE);
                 } else {
                     if (mWeekViews.contains(mLastWeekView)) {
                         mWeekViews.remove(mLastWeekView);
                     }
-                    mLastWeekView.setVisibility(GONE);
                 }
             }
         }
