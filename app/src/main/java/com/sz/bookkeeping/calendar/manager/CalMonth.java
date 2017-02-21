@@ -45,6 +45,10 @@ public class CalMonth {
         return mWeekList;
     }
 
+    public CalWeek getLastWeek() {
+        return mWeekList.get(WEEK_IN_MONTH - 1);
+    }
+
     public CalDay getFirstDayOfMonth() {
         return new CalDay(mYear, mMonth, 1);
     }

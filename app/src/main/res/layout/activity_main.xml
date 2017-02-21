@@ -10,9 +10,11 @@
     <android.support.v7.widget.Toolbar
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?android:attr/colorPrimary">
+        android:background="?android:attr/colorPrimary"/>
 
-    </android.support.v7.widget.Toolbar>
+    <!--<android.support.v4.view.ViewPager-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"/>-->
 
     <com.sz.bookkeeping.calendar.widget.CalendarView
         android:id="@+id/view_calendar"
@@ -20,5 +22,15 @@
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:padding="10dp"/>
+
+    <TextView
+        android:id="@+id/btn_change"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_margin="15dp"
+        android:background="@color/white"
+        android:gravity="center"
+        android:text="change"
+        android:textColor="#000000"/>
 
 </LinearLayout>

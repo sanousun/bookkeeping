@@ -54,7 +54,7 @@ public class CalWeek {
 
     public boolean isEnable() {
         return mDayList.get(0).getMonth() == curMonth
-                && mDayList.get(DAY_IN_WEEK - 1).getMonth() == curMonth;
+                || mDayList.get(DAY_IN_WEEK - 1).getMonth() == curMonth;
     }
 
     public boolean isEndDayEnable() {

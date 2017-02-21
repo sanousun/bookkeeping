@@ -102,4 +102,8 @@ public class WeekView extends LinearLayout {
     public interface OnDayOfWeekSelectListener {
         void onDaySelect(CalDay calDay);
     }
+
+    public boolean isWeekEnable() {
+        return mCalWeek == null || mCalWeek.isEnable();
+    }
 }

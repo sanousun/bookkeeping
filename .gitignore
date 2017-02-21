@@ -52,3 +52,7 @@ google-services.json
 freeline.py
 freeline/
 freeline_project_description.json
+app/libs/
+app/src/androidTest/
+app/src/main/res/values-w820dp/
+app/src/test/
