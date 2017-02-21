@@ -14,7 +14,7 @@ import java.util.List;
 
 public class CalMonth {
 
-    private static final int WEEK_IN_MONTH = 6;
+    public static final int WEEK_IN_MONTH = 6;
 
     private List<CalWeek> mWeekList;
     private int mYear;

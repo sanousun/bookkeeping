@@ -31,19 +31,18 @@ import java.util.List;
 public class CalendarView extends FrameLayout {
 
     private static final int DURING_COLLAPSE = 300;
+    private static final int WEEK_VIEW_COUNT = CalMonth.WEEK_IN_MONTH;
 
     private static final int STATE_MONTH = 0;
     private static final int STATE_WEEK = 1;
-
-    private List<WeekView> mWeekViews;
-    private WeekView mLastWeekView;
-    private boolean isLastWeekViewEnable = true;
 
     private CalMonth mCalMonth;
     private CalDay mSelectDay;
     private int mMinHeight;
     private int mMaxHeight;
     private int mCurHeight;
+    private List<WeekView> mWeekViews;
+    private WeekView mBottomWeekView;
 
     private int mState;
     private OnDayOfMonthSelectListener mOnDayOfMonthSelectListener;
@@ -68,8 +67,9 @@ public class CalendarView extends FrameLayout {
         mWeekViews.add(new WeekView(context));
         mWeekViews.add(new WeekView(context));
         mWeekViews.add(new WeekView(context));
-        mLastWeekView = new WeekView(context);
-        mWeekViews.add(mLastWeekView);
+        mBottomWeekView = new WeekView(context);
+        mWeekViews.add(mBottomWeekView);
+
         mMinHeight = SizeUtils.getScreenWidth(context) * 3 / 28;
         mMaxHeight = 0;
         for (int i = 0; i < mWeekViews.size(); i++) {
@@ -81,11 +81,10 @@ public class CalendarView extends FrameLayout {
             addView(weekView);
         }
         mCurHeight = mState == STATE_MONTH ? mMaxHeight : mMinHeight;
+        touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         setCalMonth(mCalMonth);
         setSelectDay(mSelectDay);
         initListener();
-        final ViewConfiguration vc = ViewConfiguration.get(context);
-        touchSlop = vc.getScaledTouchSlop();
     }
 
     private int touchSlop;
@@ -135,7 +134,6 @@ public class CalendarView extends FrameLayout {
                 int dx = currentX - lastTouchX;
                 int dy = currentY - lastTouchY;
                 mCurHeight += dy;
-                Log.e("xyz", "currentY：" + currentY + " lastTouchY:" + lastTouchY + " dy：" + dy);
                 if (mCurHeight > mMaxHeight) {
                     mCurHeight = mMaxHeight;
                 } else if (mCurHeight < mMinHeight) {
@@ -154,10 +152,6 @@ public class CalendarView extends FrameLayout {
         return true;
     }
 
-    public void setOnDayOfMonthSelectListener(OnDayOfMonthSelectListener onDayOfMonthSelectListener) {
-        mOnDayOfMonthSelectListener = onDayOfMonthSelectListener;
-    }
-
     private void initListener() {
         for (WeekView weekView : mWeekViews) {
             weekView.setOnDayOfWeekSelectListener(calDay -> {
@@ -167,6 +161,10 @@ public class CalendarView extends FrameLayout {
                 }
             });
         }
+    }
+
+    public void setOnDayOfMonthSelectListener(OnDayOfMonthSelectListener onDayOfMonthSelectListener) {
+        mOnDayOfMonthSelectListener = onDayOfMonthSelectListener;
     }
 
     public CalDay getSelectDay() {
@@ -184,81 +182,75 @@ public class CalendarView extends FrameLayout {
     public void setCalMonth(CalMonth calMonth) {
         if (calMonth == null) return;
         mCalMonth = calMonth;
-        for (int i = 0; i < mCalMonth.getWeekList().size() - 1; i++) {
+        for (int i = 0; i < WEEK_VIEW_COUNT - 1; i++) {
             WeekView weekView = mWeekViews.get(i);
             CalWeek calWeek = mCalMonth.getWeekList().get(i);
             weekView.setCalWeek(calWeek);
         }
-        mLastWeekView.setCalWeek(mCalMonth.getLastWeek());
+        mBottomWeekView.setCalWeek(mCalMonth.getLastWeek());
         if (mSelectDay == null || mSelectDay.getMonth() != mCalMonth.getMonth()) {
             setSelectDay(mCalMonth.getFirstDayOfMonth());
         }
-        fixLastWeekViewStates();
+        fixViewHeight();
     }
 
-    private void fixLastWeekViewStates() {
-        //如果最后的weekView状态和上次的不一致时，需要更改view的状态
-        if (isLastWeekViewEnable ^ mLastWeekView.isWeekEnable()) {
-            if (isLastWeekViewEnable) {
-                mMaxHeight -= mMinHeight;
-            } else {
-                mMaxHeight += mMinHeight;
-            }
-            Log.e("xyz", "mMaxHeight：" + mMaxHeight / mMinHeight);
-            //如果是月视图状态，需要进行最后的weekView展示消失的动画
-            if (mState == STATE_MONTH) {
-                ValueAnimator valueAnimator = ValueAnimator.ofInt(
-                        mCurHeight + getPaddingTop() + getPaddingBottom(),
-                        mMaxHeight + getPaddingTop() + getPaddingBottom());
-                valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
-                valueAnimator.setDuration(DURING_COLLAPSE);
-                valueAnimator.addUpdateListener(va -> {
-                    ViewGroup.LayoutParams lp = getLayoutParams();
-                    lp.height = (int) va.getAnimatedValue();
-                    setLayoutParams(lp);
-                    Log.e("xyz", "height：" + lp.height);
-                });
-                valueAnimator.addListener(new AnimatorListenerAdapter() {
+    private void fixViewHeight() {
+        //判断底部weekView状态
+        if (mBottomWeekView.isWeekEnable()) {
+            mMaxHeight = mMinHeight * WEEK_VIEW_COUNT;
+        } else {
+            mMaxHeight = mMinHeight * (WEEK_VIEW_COUNT - 1);
+        }
+        Log.e("xyz", mMaxHeight + "");
+        //如果是月视图状态，需要进行底部weekView展示或者消失的动画
+        if (mState == STATE_MONTH && mCurHeight != mMaxHeight) {
+            ValueAnimator valueAnimator = ValueAnimator.ofInt(
+                    mCurHeight + getPaddingTop() + getPaddingBottom(),
+                    mMaxHeight + getPaddingTop() + getPaddingBottom());
+            valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+            valueAnimator.setDuration(DURING_COLLAPSE);
+            valueAnimator.addUpdateListener(va -> {
+                ViewGroup.LayoutParams lp = getLayoutParams();
+                lp.height = (int) va.getAnimatedValue();
+                setLayoutParams(lp);
+            });
+            valueAnimator.addListener(new AnimatorListenerAdapter() {
 
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        if (mLastWeekView.isWeekEnable()) {
-                            if (!mWeekViews.contains(mLastWeekView)) {
-                                mWeekViews.add(mLastWeekView);
-                            }
-                            mLastWeekView.setVisibility(VISIBLE);
-                        }
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        ViewGroup.LayoutParams lp = getLayoutParams();
-                        lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                        setLayoutParams(lp);
-                        if (!mLastWeekView.isWeekEnable()) {
-                            if (mWeekViews.contains(mLastWeekView)) {
-                                mWeekViews.remove(mLastWeekView);
-                            }
-                            mLastWeekView.setVisibility(GONE);
-                        }
-                        mCurHeight = mMaxHeight;
-                    }
-                });
-                valueAnimator.start();
-            } else {
-                if (mLastWeekView.isWeekEnable()) {
-                    if (!mWeekViews.contains(mLastWeekView)) {
-                        mWeekViews.add(mLastWeekView);
-                    }
-                } else {
-                    if (mWeekViews.contains(mLastWeekView)) {
-                        mWeekViews.remove(mLastWeekView);
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    LayoutParams layoutParams = (LayoutParams) mBottomWeekView.getLayoutParams();
+                    layoutParams.setMargins(0, mMinHeight * (WEEK_VIEW_COUNT - 1), 0, 0);
+                    mBottomWeekView.setLayoutParams(layoutParams);
+                    if (mBottomWeekView.isWeekEnable()) {
+                        addOrRemoveView(true);
+                        mBottomWeekView.setVisibility(VISIBLE);
                     }
                 }
-            }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (!mBottomWeekView.isWeekEnable()) {
+                        addOrRemoveView(false);
+                        mBottomWeekView.setVisibility(GONE);
+                    }
+                    mCurHeight = mMaxHeight;
+                    ViewGroup.LayoutParams lp = getLayoutParams();
+                    lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                    setLayoutParams(lp);
+                }
+            });
+            valueAnimator.start();
+        } else {
+            addOrRemoveView(mBottomWeekView.isWeekEnable());
         }
-        //状态赋值
-        isLastWeekViewEnable = mLastWeekView.isWeekEnable();
+    }
+
+    private void addOrRemoveView(boolean isAdd) {
+        if (isAdd && !mWeekViews.contains(mBottomWeekView)) {
+            mWeekViews.add(mBottomWeekView);
+        } else if (!isAdd && mWeekViews.contains(mBottomWeekView)) {
+            mWeekViews.remove(mBottomWeekView);
+        }
     }
 
     public CalMonth getCalMonth() {
@@ -276,7 +268,8 @@ public class CalendarView extends FrameLayout {
                 locationY += mMinHeight;
             }
         } else {
-            float rate = (mCurHeight - mMinHeight) * 1.0f / (mMaxHeight - (curSelectWeek + 1) * mMinHeight);
+            float rate = (mCurHeight - mMinHeight) * 1.0f /
+                    (mMaxHeight - (curSelectWeek + 1) * mMinHeight);
             for (int i = 0; i < mWeekViews.size(); i++) {
                 WeekView weekView = mWeekViews.get(i);
                 if (i < curSelectWeek) {
