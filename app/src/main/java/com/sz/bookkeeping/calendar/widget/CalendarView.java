@@ -7,7 +7,6 @@ import android.content.Context;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -50,8 +49,6 @@ public class CalendarView extends FrameLayout {
     private int mState;
     private OnDayOfMonthSelectListener mOnDayOfMonthSelectListener;
 
-    private GestureDetector mGestureDetector;
-
     public CalendarView(Context context) {
         this(context, null);
     }
@@ -67,7 +64,6 @@ public class CalendarView extends FrameLayout {
 
     private void initView(Context context, AttributeSet attrs) {
         inflate(context, R.layout.view_calendar, this);
-        mGestureDetector = new GestureDetector(context, new MyGestureDetector());
         mWeekViews = new ArrayList<>();
         mWeekViews.add((WeekView) findViewById(R.id.view_week0));
         mWeekViews.add((WeekView) findViewById(R.id.view_week1));
@@ -106,6 +102,8 @@ public class CalendarView extends FrameLayout {
         int currentY = (int) ev.getY();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                lastTouchX = currentX;
+                lastTouchY = currentY;
                 isIntercept = false;//点击事件分发给子控件
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -122,6 +120,41 @@ public class CalendarView extends FrameLayout {
         lastX = currentX;
         lastY = currentY;
         return isIntercept;
+    }
+
+    private int lastTouchX;
+    private int lastTouchY;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int action = event.getAction();
+        int currentX = (int) event.getX();
+        int currentY = (int) event.getY();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                //被DayView消费了，获取不到
+                return false;
+            case MotionEvent.ACTION_MOVE:
+                int dx = currentX - lastTouchX;
+                int dy = currentY - lastTouchY;
+                mCurHeight += dy;
+                Log.e("xyz", "currentY："+currentY+" lastTouchY:"+lastTouchY+" dy：" + dy);
+                if (mCurHeight > mMaxHeight) {
+                    mCurHeight = mMaxHeight;
+                } else if (mCurHeight < mMinHeight) {
+                    mCurHeight = mMinHeight;
+                }
+                layoutChild();
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                autoCollapse();
+                break;
+        }
+        //记录上次滑动的位置
+        lastTouchX = currentX;
+        lastTouchY = currentY;
+        return true;
     }
 
     public void setOnDayOfMonthSelectListener(OnDayOfMonthSelectListener onDayOfMonthSelectListener) {
@@ -160,7 +193,7 @@ public class CalendarView extends FrameLayout {
             weekView.setCalWeek(calWeek);
         }
         mLastWeekView.setCalWeek(mCalMonth.getLastWeek());
-        if (mSelectDay == null) {
+        if (mSelectDay == null || mSelectDay.getMonth() != mCalMonth.getMonth()) {
             setSelectDay(mCalMonth.getFirstDayOfMonth());
         }
         fixLastWeekViewStates();
@@ -281,15 +314,6 @@ public class CalendarView extends FrameLayout {
         }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        mGestureDetector.onTouchEvent(event);
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            autoCollapse();
-        }
-        return true;
-    }
-
     private void autoCollapse() {
         int form = mCurHeight;
         int to;
@@ -315,27 +339,6 @@ public class CalendarView extends FrameLayout {
 
         });
         valueAnimator.start();
-    }
-
-    private class MyGestureDetector extends GestureDetector.SimpleOnGestureListener {
-
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            Log.e("xyz", "distanceX：" + distanceX + "; distanceY：" + distanceY);
-            mCurHeight -= distanceY * 3 / 4;
-            if (mCurHeight > mMaxHeight) {
-                mCurHeight = mMaxHeight;
-            } else if (mCurHeight < mMinHeight) {
-                mCurHeight = mMinHeight;
-            }
-            layoutChild();
-            return true;
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            return super.onFling(e1, e2, velocityX, velocityY);
-        }
     }
 
     public interface OnDayOfMonthSelectListener {

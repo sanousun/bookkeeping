@@ -19,12 +19,14 @@ public class CalMonth {
     private List<CalWeek> mWeekList;
     private int mYear;
     private int mMonth;
+    private boolean isNowMonth;
 
     public CalMonth(int year, int month) {
         mYear = year;
         mMonth = month;
         mWeekList = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
+        isNowMonth = (calendar.get(Calendar.MONTH) + 1) == month;
         calendar.set(year, month - 1, 1);
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1;
         if (dayOfWeek == 0) {
@@ -47,6 +49,14 @@ public class CalMonth {
 
     public CalWeek getLastWeek() {
         return mWeekList.get(WEEK_IN_MONTH - 1);
+    }
+
+    public int getMonth() {
+        return mMonth;
+    }
+
+    public boolean isNowMonth() {
+        return isNowMonth;
     }
 
     public CalDay getFirstDayOfMonth() {

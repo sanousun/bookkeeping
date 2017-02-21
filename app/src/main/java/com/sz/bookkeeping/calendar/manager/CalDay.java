@@ -31,6 +31,14 @@ public class CalDay {
     //这天的特殊描述，节日或者农历
     private String mDayDescription;
 
+    public static CalDay getToday() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        return new CalDay(year, month, day);
+    }
+
     public CalDay(int year, int month, int day) {
         solar = new Solar();
         solar.solarYear = year;

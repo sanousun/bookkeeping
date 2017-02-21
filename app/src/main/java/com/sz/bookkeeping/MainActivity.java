@@ -16,7 +16,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         CalendarView calendarView = (CalendarView) findViewById(R.id.view_calendar);
         CalMonth calMonth = new CalMonth(2017, 2);
-        isOne = false;
         calendarView.setCalMonth(calMonth);
         findViewById(R.id.btn_change).setOnClickListener(view -> {
             CalMonth month;
