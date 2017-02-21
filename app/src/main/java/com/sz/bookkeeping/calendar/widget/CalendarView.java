@@ -12,7 +12,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.sz.bookkeeping.R;
 import com.sz.bookkeeping.calendar.manager.CalDay;
 import com.sz.bookkeeping.calendar.manager.CalMonth;
 import com.sz.bookkeeping.calendar.manager.CalWeek;
@@ -63,24 +62,23 @@ public class CalendarView extends FrameLayout {
     }
 
     private void initView(Context context, AttributeSet attrs) {
-        inflate(context, R.layout.view_calendar, this);
         mWeekViews = new ArrayList<>();
-        mWeekViews.add((WeekView) findViewById(R.id.view_week0));
-        mWeekViews.add((WeekView) findViewById(R.id.view_week1));
-        mWeekViews.add((WeekView) findViewById(R.id.view_week2));
-        mWeekViews.add((WeekView) findViewById(R.id.view_week3));
-        mWeekViews.add((WeekView) findViewById(R.id.view_week4));
-        mLastWeekView = (WeekView) findViewById(R.id.view_week5);
+        mWeekViews.add(new WeekView(context));
+        mWeekViews.add(new WeekView(context));
+        mWeekViews.add(new WeekView(context));
+        mWeekViews.add(new WeekView(context));
+        mWeekViews.add(new WeekView(context));
+        mLastWeekView = new WeekView(context);
         mWeekViews.add(mLastWeekView);
         mMinHeight = SizeUtils.getScreenWidth(context) * 3 / 28;
         mMaxHeight = 0;
         for (int i = 0; i < mWeekViews.size(); i++) {
             WeekView weekView = mWeekViews.get(i);
-            LayoutParams layoutParams = (LayoutParams) weekView.getLayoutParams();
+            LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, mMinHeight);
             layoutParams.setMargins(0, mMaxHeight, 0, 0);
-            layoutParams.height = mMinHeight;
             mMaxHeight += mMinHeight;
             weekView.setLayoutParams(layoutParams);
+            addView(weekView);
         }
         mCurHeight = mState == STATE_MONTH ? mMaxHeight : mMinHeight;
         setCalMonth(mCalMonth);
@@ -90,9 +88,11 @@ public class CalendarView extends FrameLayout {
         touchSlop = vc.getScaledTouchSlop();
     }
 
+    private int touchSlop;
     private int lastX;
     private int lastY;
-    private int touchSlop;
+    private int lastTouchX;
+    private int lastTouchY;
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -122,9 +122,6 @@ public class CalendarView extends FrameLayout {
         return isIntercept;
     }
 
-    private int lastTouchX;
-    private int lastTouchY;
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
@@ -138,7 +135,7 @@ public class CalendarView extends FrameLayout {
                 int dx = currentX - lastTouchX;
                 int dy = currentY - lastTouchY;
                 mCurHeight += dy;
-                Log.e("xyz", "currentY："+currentY+" lastTouchY:"+lastTouchY+" dy：" + dy);
+                Log.e("xyz", "currentY：" + currentY + " lastTouchY:" + lastTouchY + " dy：" + dy);
                 if (mCurHeight > mMaxHeight) {
                     mCurHeight = mMaxHeight;
                 } else if (mCurHeight < mMinHeight) {
