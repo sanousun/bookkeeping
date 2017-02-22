@@ -43,6 +43,7 @@ public class WeekView extends LinearLayout {
     private void initView(Context context, AttributeSet attrs) {
         inflate(context, R.layout.view_week, this);
         mDayViews = new ArrayList<>();
+        mDayViews.add((DayView) findViewById(R.id.view_day0));
         mDayViews.add((DayView) findViewById(R.id.view_day1));
         mDayViews.add((DayView) findViewById(R.id.view_day2));
         mDayViews.add((DayView) findViewById(R.id.view_day3));
