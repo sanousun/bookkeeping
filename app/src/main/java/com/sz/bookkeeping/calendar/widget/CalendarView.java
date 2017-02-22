@@ -221,6 +221,7 @@ public class CalendarView extends FrameLayout {
                     LayoutParams layoutParams = (LayoutParams) mBottomWeekView.getLayoutParams();
                     layoutParams.setMargins(0, mMinHeight * (WEEK_VIEW_COUNT - 1), 0, 0);
                     mBottomWeekView.setLayoutParams(layoutParams);
+                    mBottomWeekView.setAlpha(1.0f);
                     if (mBottomWeekView.isWeekEnable()) {
                         addOrRemoveView(true);
                         mBottomWeekView.setVisibility(VISIBLE);
