@@ -10,6 +10,7 @@ android {
         targetSdkVersion rootProject.ext.android.targetSdkVersion
         versionCode rootProject.ext.apkVersion.versionCode
         versionName rootProject.ext.apkVersion.versionName
+        multiDexEnabled true
     }
     buildTypes {
         release {

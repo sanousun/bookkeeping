@@ -22,6 +22,10 @@ public class CalWeek {
         return mDayList;
     }
 
+    public CalDay getDay(int i) {
+        return mDayList.get(i);
+    }
+
     public CalWeek(int sy, int sm, int sd, int curMonth) {
         this.curMonth = curMonth;
         mDayList = new ArrayList<>();

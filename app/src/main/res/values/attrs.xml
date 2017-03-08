@@ -13,6 +13,7 @@
         <attr name="dot_color" format="color"/>
         <attr name="bg_color_today" format="color"/>
         <attr name="bg_color_selected" format="color"/>
+        <attr name="bg_radius_size" format="dimension"/>
     </declare-styleable>
 
 </resources>

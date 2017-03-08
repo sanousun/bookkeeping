@@ -184,6 +184,14 @@ public class LunarUtils {
         return solar;
     }
 
+    public static int getMinYear() {
+        return solar_1_1[0] + 1;
+    }
+
+    public static int getMaxYear() {
+        return getMinYear() + solar_1_1.length - 1;
+    }
+
     /**
      * 农历转公历
      *

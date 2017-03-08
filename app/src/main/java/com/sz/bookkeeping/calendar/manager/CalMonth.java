@@ -47,8 +47,20 @@ public class CalMonth {
         return mWeekList;
     }
 
+    public CalWeek getWeek(int i) {
+        return mWeekList.get(i);
+    }
+
+    public CalWeek getFirstWeek() {
+        return mWeekList.get(0);
+    }
+
     public CalWeek getLastWeek() {
         return mWeekList.get(WEEK_IN_MONTH - 1);
+    }
+
+    public boolean isLastWeekEnable() {
+        return mWeekList.get(WEEK_IN_MONTH - 1).isEnable();
     }
 
     public int getMonth() {
@@ -61,5 +73,24 @@ public class CalMonth {
 
     public CalDay getFirstDayOfMonth() {
         return new CalDay(mYear, mMonth, 1);
+    }
+
+    public static CalMonth getCurMonth() {
+        Calendar calendar = Calendar.getInstance();
+        return new CalMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
+    }
+
+    public CalMonth pre() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(mYear, mMonth - 1, 1);
+        calendar.add(Calendar.MONTH, -1);
+        return new CalMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
+    }
+
+    public CalMonth next() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(mYear, mMonth - 1, 1);
+        calendar.add(Calendar.MONTH, 1);
+        return new CalMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
     }
 }
