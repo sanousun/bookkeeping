@@ -11,7 +11,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?android:attr/colorPrimary"/>
 
-    <com.sz.bookkeeping.calendar.widget.CalendarViewPager
+    <com.sz.bookkeeping.calendar.widget.CalendarView
         android:id="@+id/vp_calendar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

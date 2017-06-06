@@ -16,4 +16,20 @@
         <attr name="bg_radius_size" format="dimension"/>
     </declare-styleable>
 
+
+    <declare-styleable name="CalendarView">
+        <attr name="cal_day_text" format="string"/>
+        <attr name="cal_day_text_size" format="dimension"/>
+        <attr name="cal_day_text_color" format="color"/>
+        <attr name="cal_day_color_selected" format="color"/>
+        <attr name="cal_desc_text" format="string"/>
+        <attr name="cal_desc_text_size" format="dimension"/>
+        <attr name="cal_desc_text_color" format="color"/>
+        <attr name="cal_dot_size" format="dimension"/>
+        <attr name="cal_dot_color" format="color"/>
+        <attr name="cal_bg_color_today" format="color"/>
+        <attr name="cal_bg_color_selected" format="color"/>
+        <attr name="cal_bg_radius_size" format="dimension"/>
+    </declare-styleable>
+
 </resources>
