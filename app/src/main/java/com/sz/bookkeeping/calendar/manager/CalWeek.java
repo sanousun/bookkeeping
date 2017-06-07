@@ -37,21 +37,23 @@ public class CalWeek {
 
     public CalWeek pre() {
         CalDay start = mDayList.get(0).add(-DAY_IN_WEEK);
-        return start.getCalWeek();
+        return start.getCalWeekForMondayMonth();
     }
 
     public CalWeek next() {
         CalDay start = mDayList.get(0).add(DAY_IN_WEEK);
-        return start.getCalWeek();
+        return start.getCalWeekForMondayMonth();
     }
 
     /**
      * 获取当前月份下的下周信息，仅供CalMonth构造使用
+     *
      * @return 下周信息
      */
-    public CalWeek nextWithCur() {
+    public CalWeek nextWithCurrentMonth() {
         CalDay start = mDayList.get(0).add(DAY_IN_WEEK);
-        return start.getCalWeek(mCurMonth);
+        CalDay.Solar solar = start.getSolar();
+        return new CalWeek(solar.solarYear, solar.solarMonth, solar.solarDay, mCurMonth);
     }
 
     public CalDay getFirstDayOfWeek() {

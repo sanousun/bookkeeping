@@ -93,6 +93,8 @@ public class CalendarView extends View {
 
     //day信息数据
     private CalDay mCurDay;
+    //week信息数据
+    private CalWeek mCurWeek;
     //month信息数据
     private CalMonth mCurMonth;
 
@@ -153,8 +155,9 @@ public class CalendarView extends View {
      * 初始化month信息和day信息
      */
     private void initDefaultDay() {
-        mCurMonth = CalMonth.getCurMonth();
         mCurDay = CalDay.getToday();
+        mCurWeek = mCurDay.getCalWeekForCurrentDayMonth();
+        mCurMonth = mCurDay.getCalMonth();
     }
 
     @Override
@@ -179,13 +182,10 @@ public class CalendarView extends View {
         setMeasuredDimension(width, viewHeight);
     }
 
-    public void setCurMonth(CalMonth curMonth) {
-        mCurMonth = curMonth;
-        mCurDay = curMonth.getFirstDayOfMonth();
-    }
-
-    public CalMonth getCurMonth() {
-        return mCurMonth;
+    public void setCurMonth(int year, int month) {
+        mCurDay = new CalDay(year, month, 1);
+        mCurWeek = mCurDay.getCalWeekForCurrentDayMonth();
+        mCurMonth = mCurDay.getCalMonth();
     }
 
     @Override
@@ -211,32 +211,35 @@ public class CalendarView extends View {
         if (mCurOffsetHorizontal == mDayWidth * COLUMN_ITEM) {
             mCurOffsetHorizontal = 0;
             if (mState == STATE_WEEK) {
-                mCurDay = mCurDay.getCalWeek().pre().getFirstDayOfWeek();
+                mCurWeek = mCurWeek.pre();
+                mCurDay = mCurWeek.getFirstDayOfWeek();
                 mCurMonth = mCurDay.getCalMonth();
             } else {
                 mCurMonth = mCurMonth.pre();
+                mCurWeek = mCurMonth.getFirstWeek();
                 mCurDay = mCurMonth.getFirstDayOfMonth();
             }
         } else if (mCurOffsetHorizontal == -mDayWidth * COLUMN_ITEM) {
             mCurOffsetHorizontal = 0;
             if (mState == STATE_WEEK) {
-                mCurDay = mCurDay.getCalWeek().next().getFirstDayOfWeek();
+                mCurWeek = mCurWeek.next();
+                mCurDay = mCurWeek.getFirstDayOfWeek();
                 mCurMonth = mCurDay.getCalMonth();
             } else {
                 mCurMonth = mCurMonth.next();
+                mCurWeek = mCurMonth.getFirstWeek();
                 mCurDay = mCurMonth.getFirstDayOfMonth();
             }
         }
         //周视图状态下
         if (mState == STATE_WEEK) {
-            CalWeek calWeek = mCurDay.getCalWeek(mCurMonth.getMonth());
             if (mCurOffsetHorizontal > 0) {
-                drawWeekView(canvas, -mDayWidth * COLUMN_ITEM, calWeek.pre());
+                drawWeekView(canvas, -mDayWidth * COLUMN_ITEM, mCurWeek.pre());
             }
             if (mCurOffsetHorizontal < 0) {
-                drawWeekView(canvas, mDayWidth * COLUMN_ITEM, calWeek.next());
+                drawWeekView(canvas, mDayWidth * COLUMN_ITEM, mCurWeek.next());
             }
-            drawWeekView(canvas, 0, calWeek);
+            drawWeekView(canvas, 0, mCurWeek);
         } else {
             if (mCurOffsetHorizontal > 0) {
                 drawMonthView(canvas, -mDayWidth * COLUMN_ITEM, mCurMonth.pre());
@@ -529,7 +532,7 @@ public class CalendarView extends View {
     /**
      * 根据移动距离将view展开或者收缩
      *
-     * @param dy 移动距离
+     * @param dy 竖直移动距离
      */
     private void expandVertical(int dy) {
         mCurHeight += dy;
@@ -542,7 +545,9 @@ public class CalendarView extends View {
     }
 
     /**
-     * 水平移动
+     * 根据移动距离左右移动
+     *
+     * @param dx 水平移动距离
      */
     private void moveHorizontal(int dx) {
         mCurOffsetHorizontal += dx;
@@ -574,9 +579,7 @@ public class CalendarView extends View {
 
                 LinearOutSlowInInterpolator());
         valueAnimator.setDuration(DURING_ANI);
-        valueAnimator.addUpdateListener(va ->
-
-        {
+        valueAnimator.addUpdateListener(va -> {
             int target = (int) va.getAnimatedValue();
             if (mCurOffsetHorizontal != target
                     && !(mCurOffsetHorizontal == 0 && target == maxWidth)
@@ -654,20 +657,19 @@ public class CalendarView extends View {
      * 点击事件
      */
     private void click() {
-        int maxHeight = MAX_ROW_ITEM * mDayHeight;
-        int minHeight = MIN_ROW_ITEM * mDayHeight;
-        int j;
-        if (mCurHeight >= maxHeight) {
-            j = (mInitTouchY - getPaddingTop()) / mDayHeight;
-        } else if (mCurHeight <= minHeight) {
-            j = mCurDay == null ? 0 : mCurDay.getWeekOfMonth() - 1;
+        if (mCurMonth == null) return;
+        int i = (mInitTouchX - getPaddingLeft()) / mDayWidth;
+        if (mState == STATE_MONTH) {
+            //月视图状态的week行数
+            int j = mCurDay == null ? 0 : mCurDay.getWeekOfMonth() - 1;
+            mCurDay = mCurMonth.getWeekList().get(j).getDayList().get(i);
+        } else if (mState == STATE_WEEK) {
+            //周视图状态当前行的week行数
+            mCurDay = mCurWeek.getDayList().get(i);
         } else {
             return;
         }
-        int i = (mInitTouchX - getPaddingLeft()) / mDayWidth;
-        if (mCurMonth != null) {
-            mCurDay = mCurMonth.getWeekList().get(j).getDayList().get(i);
-            invalidate();
-        }
+        //获取选中的天
+        invalidate();
     }
 }

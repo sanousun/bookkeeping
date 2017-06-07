@@ -25,10 +25,10 @@ public class CalMonth {
         mMonth = month;
         mWeekList = new ArrayList<>();
         CalDay startDay = new CalDay(year, month, 1);
-        CalWeek startWeek = startDay.getCalWeek(month);
+        CalWeek startWeek = startDay.getCalWeekForCurrentDayMonth();
         mWeekList.add(startWeek);
         for (int i = 0; i < WEEK_IN_MONTH - 1; i++) {
-            mWeekList.add(mWeekList.get(i).nextWithCur());
+            mWeekList.add(mWeekList.get(i).nextWithCurrentMonth());
         }
     }
 

@@ -112,21 +112,22 @@ public class CalDay {
         return add(1);
     }
 
-    public CalWeek getCalWeek() {
+    /**
+     * 获取周信息，月份是周一的
+     */
+    public CalWeek getCalWeekForMondayMonth() {
         CalDay calDay = add(1 - getDayOfWeek());
         Solar solar = calDay.getSolar();
         return new CalWeek(solar.solarYear, solar.solarMonth, solar.solarDay, solar.solarMonth);
     }
 
     /**
-     * 有时候获取的周信息可能并不是当前月份的
-     * @param curMonth 当前月份
-     * @return 周信息
+     * 获取的周信息，月份是当前日期的
      */
-    public CalWeek getCalWeek(int curMonth) {
+    public CalWeek getCalWeekForCurrentDayMonth() {
         CalDay calDay = add(1 - getDayOfWeek());
         Solar solar = calDay.getSolar();
-        return new CalWeek(solar.solarYear, solar.solarMonth, solar.solarDay, curMonth);
+        return new CalWeek(solar.solarYear, solar.solarMonth, solar.solarDay, getMonth());
     }
 
     public CalMonth getCalMonth() {
@@ -139,6 +140,7 @@ public class CalDay {
 
     /**
      * 星期一作为第一天，获取当前的日期是一个月中的第几个礼拜
+     *
      * @return 第一个礼拜:0
      */
     public int getWeekOfMonth() {
@@ -149,6 +151,7 @@ public class CalDay {
 
     /**
      * 获取当前的日期是一个礼拜中的第几天
+     *
      * @return 星期一:1; 星期天:7
      */
     public int getDayOfWeek() {
