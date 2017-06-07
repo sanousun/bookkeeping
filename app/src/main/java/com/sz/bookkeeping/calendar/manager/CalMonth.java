@@ -74,4 +74,8 @@ public class CalMonth {
         calendar.add(Calendar.MONTH, 1);
         return new CalMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
     }
+
+    public boolean isContain(CalDay calDay) {
+        return calDay.getMonth() == getMonth();
+    }
 }

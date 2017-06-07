@@ -113,6 +113,22 @@ public class CalDay {
     }
 
     /**
+     * 计算一周前的那一天
+     * @return 一周前的那一天
+     */
+    public CalDay weekPre() {
+        return add(-CalWeek.DAY_IN_WEEK);
+    }
+
+    /**
+     * 计算一周后的那一天
+     * @return 一周后的那一天
+     */
+    public CalDay weekNext() {
+        return add(CalWeek.DAY_IN_WEEK);
+    }
+
+    /**
      * 获取周信息，月份是周一的
      */
     public CalWeek getCalWeekForMondayMonth() {

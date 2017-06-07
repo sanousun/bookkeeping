@@ -13,7 +13,7 @@ import java.util.List;
 
 public class CalWeek {
 
-    private static final int DAY_IN_WEEK = 7;
+    public static final int DAY_IN_WEEK = 7;
 
     private int mCurMonth;
     private List<CalDay> mDayList;

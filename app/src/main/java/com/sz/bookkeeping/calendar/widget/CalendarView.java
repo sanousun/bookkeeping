@@ -84,7 +84,7 @@ public class CalendarView extends View {
     //被选中的day视图文字颜色，包括描述文字颜色和小圆点的颜色
     private int mDayColorSelected;
 
-    //今天未被选中的背景颜色
+    //today未被选中的背景颜色
     private int mBgColorToday;
     //被选中的day视图背景颜色
     private int mBgColorSelected;
@@ -211,43 +211,61 @@ public class CalendarView extends View {
         if (mCurOffsetHorizontal == mDayWidth * COLUMN_ITEM) {
             mCurOffsetHorizontal = 0;
             if (mState == STATE_WEEK) {
-                mCurWeek = mCurWeek.pre();
-                mCurDay = mCurWeek.getFirstDayOfWeek();
+                mCurDay = mCurDay.weekPre();
+                mCurWeek = mCurDay.getCalWeekForCurrentDayMonth();
                 mCurMonth = mCurDay.getCalMonth();
             } else {
                 mCurMonth = mCurMonth.pre();
-                mCurWeek = mCurMonth.getFirstWeek();
-                mCurDay = mCurMonth.getFirstDayOfMonth();
+                if (mCurMonth.isContain(mCurDay)) {
+                    mCurDay.setEnable(true);
+                    mCurWeek = mCurDay.getCalWeekForCurrentDayMonth();
+                } else {
+                    mCurWeek = mCurMonth.getFirstWeek();
+                    mCurDay = mCurMonth.getFirstDayOfMonth();
+                }
             }
         } else if (mCurOffsetHorizontal == -mDayWidth * COLUMN_ITEM) {
             mCurOffsetHorizontal = 0;
             if (mState == STATE_WEEK) {
-                mCurWeek = mCurWeek.next();
-                mCurDay = mCurWeek.getFirstDayOfWeek();
+                mCurDay = mCurDay.weekNext();
+                mCurWeek = mCurDay.getCalWeekForCurrentDayMonth();
                 mCurMonth = mCurDay.getCalMonth();
             } else {
                 mCurMonth = mCurMonth.next();
-                mCurWeek = mCurMonth.getFirstWeek();
-                mCurDay = mCurMonth.getFirstDayOfMonth();
+                if (mCurMonth.isContain(mCurDay)) {
+                    mCurDay.setEnable(true);
+                    mCurWeek = mCurDay.getCalWeekForCurrentDayMonth();
+                } else {
+                    mCurWeek = mCurMonth.getFirstWeek();
+                    mCurDay = mCurMonth.getFirstDayOfMonth();
+                }
             }
         }
         //周视图状态下
         if (mState == STATE_WEEK) {
             if (mCurOffsetHorizontal > 0) {
-                drawWeekView(canvas, -mDayWidth * COLUMN_ITEM, mCurWeek.pre());
+                CalDay pre = mCurDay.weekPre();
+                drawWeekView(canvas, -mDayWidth * COLUMN_ITEM,
+                        pre.getCalWeekForCurrentDayMonth(), pre);
             }
             if (mCurOffsetHorizontal < 0) {
-                drawWeekView(canvas, mDayWidth * COLUMN_ITEM, mCurWeek.next());
+                CalDay next = mCurDay.weekNext();
+                drawWeekView(canvas, mDayWidth * COLUMN_ITEM,
+                        next.getCalWeekForCurrentDayMonth(), next);
             }
-            drawWeekView(canvas, 0, mCurWeek);
+            drawWeekView(canvas, 0, mCurWeek, mCurDay);
         } else {
             if (mCurOffsetHorizontal > 0) {
-                drawMonthView(canvas, -mDayWidth * COLUMN_ITEM, mCurMonth.pre());
+                CalMonth pre = mCurMonth.pre();
+                drawMonthView(canvas, -mDayWidth * COLUMN_ITEM,
+                        pre, pre.isContain(mCurDay) ? mCurDay : pre.getFirstDayOfMonth());
             }
             if (mCurOffsetHorizontal < 0) {
-                drawMonthView(canvas, mDayWidth * COLUMN_ITEM, mCurMonth.next());
+                CalMonth next = mCurMonth.next();
+                drawMonthView(canvas, mDayWidth * COLUMN_ITEM,
+                        next, next.isContain(mCurDay) ? mCurDay : next.getFirstDayOfMonth());
             }
-            drawMonthView(canvas, 0, mCurMonth);
+            drawMonthView(canvas, 0, mCurMonth, mCurDay);
         }
     }
 
@@ -257,12 +275,16 @@ public class CalendarView extends View {
      * @param canvas  画布
      * @param offsetX 整个视图的偏移量，并不是左右滑动的偏移
      * @param calWeek 周数据信息
+     * @param calDay  被选中的day数据信息
      */
-    private void drawWeekView(Canvas canvas, int offsetX, CalWeek calWeek) {
+
+    private void drawWeekView(Canvas canvas, int offsetX, CalWeek calWeek, CalDay calDay) {
         for (int i = 0; i < calWeek.getDayList().size(); i++) {
-            CalDay calDay = calWeek.getDayList().get(i);
             int startX = getPaddingLeft() + mDayWidth * i + mCurOffsetHorizontal + offsetX;
-            drawDayView(canvas, startX, getPaddingTop(), 1f, calDay);
+            drawDayView(canvas,
+                    startX, getPaddingTop(),
+                    1f,
+                    calWeek.getDayList().get(i), calDay);
         }
     }
 
@@ -272,8 +294,9 @@ public class CalendarView extends View {
      * @param canvas   画布
      * @param offsetX  整个视图的偏移量，并不是左右滑动的偏移
      * @param calMonth 月数据信息
+     * @param calDay   被选中的day数据信息
      */
-    private void drawMonthView(Canvas canvas, int offsetX, CalMonth calMonth) {
+    private void drawMonthView(Canvas canvas, int offsetX, CalMonth calMonth, CalDay calDay) {
         for (int i = 0; i < calMonth.getWeekList().size(); i++) {
             CalWeek calWeek = calMonth.getWeekList().get(i);
             //计算起始y
@@ -281,7 +304,10 @@ public class CalendarView extends View {
             for (int j = 0; j < calWeek.getDayList().size(); j++) {
                 //计算起始x
                 int startX = getPaddingLeft() + mDayWidth * j + mCurOffsetHorizontal + offsetX;
-                drawDayView(canvas, startX, startY, 1f, calWeek.getDayList().get(j));
+                drawDayView(canvas,
+                        startX, startY,
+                        1f,
+                        calWeek.getDayList().get(j), calDay);
             }
         }
     }
@@ -328,8 +354,10 @@ public class CalendarView extends View {
             for (int j = 0; j < calWeek.getDayList().size(); j++) {
                 //计算起始x
                 int startX = getPaddingLeft() + mDayWidth * j + mCurOffsetHorizontal;
-                drawDayView(canvas, startX, startY, (i <= selectRow ? 1f : alpha),
-                        calWeek.getDayList().get(j));
+                drawDayView(canvas,
+                        startX, startY,
+                        (i <= selectRow ? 1f : alpha),
+                        calWeek.getDayList().get(j), mCurDay);
             }
         }
     }
@@ -360,8 +388,10 @@ public class CalendarView extends View {
             }
             for (int j = 0; j < calWeek.getDayList().size(); j++) {
                 int startX = getPaddingLeft() + mDayWidth * j + mCurOffsetHorizontal;
-                drawDayView(canvas, startX, startY, (i <= selectRow ? 1f : alpha),
-                        calWeek.getDayList().get(j));
+                drawDayView(canvas,
+                        startX, startY,
+                        (i <= selectRow ? 1f : alpha),
+                        calWeek.getDayList().get(j), mCurDay);
             }
         }
     }
@@ -370,13 +400,15 @@ public class CalendarView extends View {
     /**
      * 绘制day视图
      *
-     * @param canvas   画布
-     * @param startX   起始位置x
-     * @param startY   起始位置y
-     * @param dayAlpha day视图的透明度
-     * @param calDay   day数据
+     * @param canvas    画布
+     * @param startX    起始位置x
+     * @param startY    起始位置y
+     * @param dayAlpha  day视图的透明度
+     * @param calDay    day数据
+     * @param selectDay 被选中的day数据
      */
-    private void drawDayView(Canvas canvas, float startX, float startY, float dayAlpha, CalDay calDay) {
+    private void drawDayView(Canvas canvas, float startX, float startY, float dayAlpha,
+                             CalDay calDay, CalDay selectDay) {
         //透明度小于0，不绘制
         if (dayAlpha <= 0) {
             return;
@@ -391,7 +423,7 @@ public class CalendarView extends View {
         }
         float midX = startX + mDayWidth / 2f;
         float midY = startY + mDayHeight / 2f;
-        boolean isSelect = calDay.equals(mCurDay);
+        boolean isSelect = calDay.equals(selectDay);
         boolean isToday = calDay.isToday();
         boolean isEnable = calDay.isEnable();
         boolean isMarked = calDay.isMarked();
@@ -457,8 +489,8 @@ public class CalendarView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         final int action = ev.getAction();
-        obtainVelocityTracker(ev);
         if (!isAutoMove) {
+            obtainVelocityTracker(ev);
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
                     isVerticalMoved = false;
@@ -594,6 +626,7 @@ public class CalendarView extends View {
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 isAutoMove = true;
+                isHorizontalFling = false;
             }
 
             @Override
@@ -608,7 +641,6 @@ public class CalendarView extends View {
     /**
      * 当触摸事件结束将会自动触发展开或者收回操作
      */
-
     private void autoExpandVertical() {
         int maxHeight = MAX_ROW_ITEM * mDayHeight;
         int minHeight = MIN_ROW_ITEM * mDayHeight;
@@ -661,15 +693,28 @@ public class CalendarView extends View {
         int i = (mInitTouchX - getPaddingLeft()) / mDayWidth;
         if (mState == STATE_MONTH) {
             //月视图状态的week行数
-            int j = mCurDay == null ? 0 : mCurDay.getWeekOfMonth() - 1;
-            mCurDay = mCurMonth.getWeekList().get(j).getDayList().get(i);
+            int j = (mInitTouchY - getPaddingTop()) / mDayHeight;
+            mCurWeek = mCurMonth.getWeekList().get(j);
+            mCurDay = mCurWeek.getDayList().get(i);
+            if (!mCurDay.isEnable()) {
+                CalMonth calMonth = mCurDay.getCalMonth();
+                if (calMonth.getMonth() > mCurMonth.getMonth()) {
+                    mCurOffsetHorizontal = -1;
+                } else if (calMonth.getMonth() < mCurMonth.getMonth()) {
+                    mCurOffsetHorizontal = 1;
+                }
+                isHorizontalFling = true;
+                autoMoveHorizontal();
+                return;
+            }
         } else if (mState == STATE_WEEK) {
             //周视图状态当前行的week行数
             mCurDay = mCurWeek.getDayList().get(i);
+            mCurWeek = mCurDay.getCalWeekForCurrentDayMonth();
         } else {
             return;
         }
-        //获取选中的天
+        //获取选中的day
         invalidate();
     }
 }
