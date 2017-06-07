@@ -19,36 +19,21 @@ public class CalMonth {
     private List<CalWeek> mWeekList;
     private int mYear;
     private int mMonth;
-    private boolean isNowMonth;
 
     public CalMonth(int year, int month) {
         mYear = year;
         mMonth = month;
         mWeekList = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
-        isNowMonth = (calendar.get(Calendar.MONTH) + 1) == month;
-        calendar.set(year, month - 1, 1);
-        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-        if (dayOfWeek == 0) {
-            dayOfWeek = 7;
-        }
-        calendar.add(Calendar.DATE, 1 - dayOfWeek);
-        int y = calendar.get(Calendar.YEAR);
-        int m = calendar.get(Calendar.MONTH) + 1;
-        int d = calendar.get(Calendar.DATE);
-        CalWeek calWeek = new CalWeek(y, m, d, month);
-        mWeekList.add(calWeek);
+        CalDay startDay = new CalDay(year, month, 1);
+        CalWeek startWeek = startDay.getCalWeek(month);
+        mWeekList.add(startWeek);
         for (int i = 0; i < WEEK_IN_MONTH - 1; i++) {
-            mWeekList.add(mWeekList.get(i).next());
+            mWeekList.add(mWeekList.get(i).nextWithCur());
         }
     }
 
     public List<CalWeek> getWeekList() {
         return mWeekList;
-    }
-
-    public CalWeek getWeek(int i) {
-        return mWeekList.get(i);
     }
 
     public CalWeek getFirstWeek() {
@@ -65,10 +50,6 @@ public class CalMonth {
 
     public int getMonth() {
         return mMonth;
-    }
-
-    public boolean isNowMonth() {
-        return isNowMonth;
     }
 
     public CalDay getFirstDayOfMonth() {

@@ -191,24 +191,102 @@ public class CalendarView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         //根据curHeight获取视图状态
+        if (mCurMonth == null) return;
         if (mCurHeight == MAX_ROW_ITEM * mDayHeight) {
             mState = STATE_MONTH;
+            drawViewWithoutExpandVertical(canvas);
         } else if (mCurHeight == MIN_ROW_ITEM * mDayHeight) {
             mState = STATE_WEEK;
+            drawViewWithoutExpandVertical(canvas);
+        } else {
+            drawViewWithoutMoveHorizontal(canvas);
         }
+    }
+
+    /**
+     * 绘制没有处于上下伸展状态下的view，此时视图可能左右移动
+     */
+    private void drawViewWithoutExpandVertical(Canvas canvas) {
         //这是对横向移动的处理
         if (mCurOffsetHorizontal == mDayWidth * COLUMN_ITEM) {
             mCurOffsetHorizontal = 0;
-            mCurMonth = mCurMonth.pre();
-            mCurDay = mCurMonth.getFirstDayOfMonth();
+            if (mState == STATE_WEEK) {
+                mCurDay = mCurDay.getCalWeek().pre().getFirstDayOfWeek();
+                mCurMonth = mCurDay.getCalMonth();
+            } else {
+                mCurMonth = mCurMonth.pre();
+                mCurDay = mCurMonth.getFirstDayOfMonth();
+            }
         } else if (mCurOffsetHorizontal == -mDayWidth * COLUMN_ITEM) {
             mCurOffsetHorizontal = 0;
-            mCurMonth = mCurMonth.next();
-            mCurDay = mCurMonth.getFirstDayOfMonth();
+            if (mState == STATE_WEEK) {
+                mCurDay = mCurDay.getCalWeek().next().getFirstDayOfWeek();
+                mCurMonth = mCurDay.getCalMonth();
+            } else {
+                mCurMonth = mCurMonth.next();
+                mCurDay = mCurMonth.getFirstDayOfMonth();
+            }
         }
-        int top = getPaddingTop();
-        int left = getPaddingLeft();
-        if (mCurMonth == null) return;
+        //周视图状态下
+        if (mState == STATE_WEEK) {
+            CalWeek calWeek = mCurDay.getCalWeek(mCurMonth.getMonth());
+            if (mCurOffsetHorizontal > 0) {
+                drawWeekView(canvas, -mDayWidth * COLUMN_ITEM, calWeek.pre());
+            }
+            if (mCurOffsetHorizontal < 0) {
+                drawWeekView(canvas, mDayWidth * COLUMN_ITEM, calWeek.next());
+            }
+            drawWeekView(canvas, 0, calWeek);
+        } else {
+            if (mCurOffsetHorizontal > 0) {
+                drawMonthView(canvas, -mDayWidth * COLUMN_ITEM, mCurMonth.pre());
+            }
+            if (mCurOffsetHorizontal < 0) {
+                drawMonthView(canvas, mDayWidth * COLUMN_ITEM, mCurMonth.next());
+            }
+            drawMonthView(canvas, 0, mCurMonth);
+        }
+    }
+
+    /**
+     * 周视图状态下的绘制
+     *
+     * @param canvas  画布
+     * @param offsetX 整个视图的偏移量，并不是左右滑动的偏移
+     * @param calWeek 周数据信息
+     */
+    private void drawWeekView(Canvas canvas, int offsetX, CalWeek calWeek) {
+        for (int i = 0; i < calWeek.getDayList().size(); i++) {
+            CalDay calDay = calWeek.getDayList().get(i);
+            int startX = getPaddingLeft() + mDayWidth * i + mCurOffsetHorizontal + offsetX;
+            drawDayView(canvas, startX, getPaddingTop(), 1f, calDay);
+        }
+    }
+
+    /**
+     * 月视图状态下的绘制
+     *
+     * @param canvas   画布
+     * @param offsetX  整个视图的偏移量，并不是左右滑动的偏移
+     * @param calMonth 月数据信息
+     */
+    private void drawMonthView(Canvas canvas, int offsetX, CalMonth calMonth) {
+        for (int i = 0; i < calMonth.getWeekList().size(); i++) {
+            CalWeek calWeek = calMonth.getWeekList().get(i);
+            //计算起始y
+            int startY = getPaddingTop() + mDayHeight * i;
+            for (int j = 0; j < calWeek.getDayList().size(); j++) {
+                //计算起始x
+                int startX = getPaddingLeft() + mDayWidth * j + mCurOffsetHorizontal + offsetX;
+                drawDayView(canvas, startX, startY, 1f, calWeek.getDayList().get(j));
+            }
+        }
+    }
+
+    /**
+     * 绘制处于上下伸展状态下的view，此时视图不能左右移动
+     */
+    private void drawViewWithoutMoveHorizontal(Canvas canvas) {
         int selectRow = mCurDay == null ? 0 : mCurDay.getWeekOfMonth() - 1;
         //因为滑动导致的隐藏的行数
         int goneRow = (mDayHeight * MAX_ROW_ITEM - mCurHeight) / mDayHeight;
@@ -219,121 +297,72 @@ public class CalendarView extends View {
         if (goneRow < selectRow) {
             //计算出第一行距离上边的距离，这个为负数，当整行bottom都小于view的top不需要绘制
             int beyondY = mCurHeight - mDayHeight * MAX_ROW_ITEM;
-            //横向移动距离大于0，说明上一个月的数据会展示
-            if (mCurOffsetHorizontal > 0) {
-                CalMonth pre = mCurMonth.pre();
-                for (int i = 0; i < pre.getWeekList().size(); i++) {
-                    CalWeek calWeek = pre.getWeekList().get(i);
-                    //计算起始y
-                    int startY = top + mDayHeight * i + beyondY;
-                    for (int j = 0; j < calWeek.getDayList().size(); j++) {
-                        //计算起始x
-                        int startX = left + mDayWidth * j + mCurOffsetHorizontal - mDayWidth * COLUMN_ITEM;
-                        drawDayView(canvas, startX, startY, (i <= selectRow ? 1f : alpha),
-                                calWeek.getDayList().get(j));
-                    }
-                }
-            }
-            //横向移动距离小于0，说明下一个月的数据会展示
-            if (mCurOffsetHorizontal < 0) {
-                CalMonth next = mCurMonth.next();
-                for (int i = 0; i < next.getWeekList().size(); i++) {
-                    CalWeek calWeek = next.getWeekList().get(i);
-                    //计算起始y
-                    int startY = top + mDayHeight * i + beyondY;
-                    for (int j = 0; j < calWeek.getDayList().size(); j++) {
-                        //计算起始x
-                        int startX = left + mDayWidth * j + mCurOffsetHorizontal + mDayWidth * COLUMN_ITEM;
-                        drawDayView(canvas, startX, startY, (i <= selectRow ? 1f : alpha),
-                                calWeek.getDayList().get(j));
-                    }
-                }
-            }
-            for (int i = 0; i < mCurMonth.getWeekList().size(); i++) {
-                CalWeek calWeek = mCurMonth.getWeekList().get(i);
-                //计算起始y
-                int startY = top + mDayHeight * i + beyondY;
-                for (int j = 0; j < calWeek.getDayList().size(); j++) {
-                    //计算起始x
-                    int startX = left + mDayWidth * j + mCurOffsetHorizontal;
-                    drawDayView(canvas, startX, startY, (i <= selectRow ? 1f : alpha),
-                            calWeek.getDayList().get(j));
-                }
-            }
+            drawMonthView1(canvas, selectRow, alpha, beyondY, mCurMonth);
         }
         //隐藏行数大于等于被选中的行数，第一行是被选中的需要展示全部，其他行数需要做特殊处理
         else {
             //由于第一行中的元素被选中，需要对后面的行数进行特殊处理，距离view的top距离需要重新算，还要加上透明度
             float rate = (mCurHeight - mDayHeight) * 1.0f
                     / (mDayHeight * MAX_ROW_ITEM - (selectRow + 1) * mDayHeight);
-            if (mCurOffsetHorizontal > 0) {
-                CalMonth pre = mCurMonth.pre();
-                for (int i = 0; i < pre.getWeekList().size(); i++) {
-                    CalWeek calWeek = pre.getWeekList().get(i);
-                    int startY;
-                    if (i < selectRow) {
-                        startY = top - mDayHeight;
-                    }
-                    //被选中的row不会被隐藏
-                    else if (i == selectRow) {
-                        startY = top;
-                    }
-                    //被选中的row上方的row需要特殊处理
-                    else {
-                        startY = top + (int) (mDayHeight * rate * (i - selectRow));
-                    }
-                    for (int j = 0; j < calWeek.getDayList().size(); j++) {
-                        int startX = left + mDayWidth * j + mCurOffsetHorizontal - mDayWidth * COLUMN_ITEM;
-                        drawDayView(canvas, startX, startY, (i <= selectRow ? 1f : alpha),
-                                calWeek.getDayList().get(j));
-                    }
-                }
-            }
-            if (mCurOffsetHorizontal < 0) {
-                CalMonth next = mCurMonth.next();
-                for (int i = 0; i < next.getWeekList().size(); i++) {
-                    CalWeek calWeek = next.getWeekList().get(i);
-                    int startY;
-                    if (i < selectRow) {
-                        startY = top - mDayHeight;
-                    }
-                    //被选中的row不会被隐藏
-                    else if (i == selectRow) {
-                        startY = top;
-                    }
-                    //被选中的row上方的row需要特殊处理
-                    else {
-                        startY = top + (int) (mDayHeight * rate * (i - selectRow));
-                    }
-                    for (int j = 0; j < calWeek.getDayList().size(); j++) {
-                        int startX = left + mDayWidth * j + mCurOffsetHorizontal + mDayWidth * COLUMN_ITEM;
-                        drawDayView(canvas, startX, startY, (i <= selectRow ? 1f : alpha),
-                                calWeek.getDayList().get(j));
-                    }
-                }
-            }
-            for (int i = 0; i < mCurMonth.getWeekList().size(); i++) {
-                CalWeek calWeek = mCurMonth.getWeekList().get(i);
-                int startY;
-                if (i < selectRow) {
-                    startY = top - mDayHeight;
-                }
-                //被选中的row不会被隐藏
-                else if (i == selectRow) {
-                    startY = top;
-                }
-                //被选中的row上方的row需要特殊处理
-                else {
-                    startY = top + (int) (mDayHeight * rate * (i - selectRow));
-                }
-                for (int j = 0; j < calWeek.getDayList().size(); j++) {
-                    int startX = left + mDayWidth * j + mCurOffsetHorizontal;
-                    drawDayView(canvas, startX, startY, (i <= selectRow ? 1f : alpha),
-                            calWeek.getDayList().get(j));
-                }
+            drawMonthView2(canvas, selectRow, alpha, rate, mCurMonth);
+        }
+    }
+
+    /**
+     * 不可见的高度未超过被选中的行
+     *
+     * @param canvas    画布
+     * @param selectRow 被选中的行
+     * @param alpha     行的透明
+     * @param beyondY   y的起始高度
+     * @param calMonth  月数据信息
+     */
+    private void drawMonthView1(Canvas canvas, int selectRow, float alpha, int beyondY, CalMonth calMonth) {
+        for (int i = 0; i < calMonth.getWeekList().size(); i++) {
+            CalWeek calWeek = calMonth.getWeekList().get(i);
+            //计算起始y
+            int startY = getPaddingTop() + mDayHeight * i + beyondY;
+            for (int j = 0; j < calWeek.getDayList().size(); j++) {
+                //计算起始x
+                int startX = getPaddingLeft() + mDayWidth * j + mCurOffsetHorizontal;
+                drawDayView(canvas, startX, startY, (i <= selectRow ? 1f : alpha),
+                        calWeek.getDayList().get(j));
             }
         }
     }
+
+    /**
+     * 不可见的高度超过被选中的行，选中的行永远保留在上方，底下的行需要进行特殊处理，加上透明度及计算距离顶部的高度
+     *
+     * @param canvas    画布
+     * @param selectRow 被选中的行
+     * @param alpha     行的透明度
+     * @param rate      行距离顶部的高度占比
+     * @param calMonth  月结构数据
+     */
+    private void drawMonthView2(Canvas canvas, int selectRow, float alpha, float rate, CalMonth calMonth) {
+        for (int i = 0; i < calMonth.getWeekList().size(); i++) {
+            CalWeek calWeek = calMonth.getWeekList().get(i);
+            int startY;
+            if (i < selectRow) {
+                startY = getPaddingTop() - mDayHeight;
+            }
+            //被选中的row不会被隐藏
+            else if (i == selectRow) {
+                startY = getPaddingTop();
+            }
+            //被选中的row上方的row需要特殊处理
+            else {
+                startY = getPaddingTop() + (int) (mDayHeight * rate * (i - selectRow));
+            }
+            for (int j = 0; j < calWeek.getDayList().size(); j++) {
+                int startX = getPaddingLeft() + mDayWidth * j + mCurOffsetHorizontal;
+                drawDayView(canvas, startX, startY, (i <= selectRow ? 1f : alpha),
+                        calWeek.getDayList().get(j));
+            }
+        }
+    }
+
 
     /**
      * 绘制day视图
@@ -484,7 +513,6 @@ public class CalendarView extends View {
     }
 
     private void obtainVelocityTracker(MotionEvent event) {
-
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
@@ -492,7 +520,6 @@ public class CalendarView extends View {
     }
 
     private void releaseVelocityTracker() {
-
         if (mVelocityTracker != null) {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
@@ -559,21 +586,19 @@ public class CalendarView extends View {
                 LogUtil.e(mCurOffsetHorizontal + "");
             }
         });
-        valueAnimator.addListener(new
+        valueAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+                isAutoMove = true;
+            }
 
-                                          AnimatorListenerAdapter() {
-                                              @Override
-                                              public void onAnimationStart(Animator animation) {
-                                                  super.onAnimationStart(animation);
-                                                  isAutoMove = true;
-                                              }
-
-                                              @Override
-                                              public void onAnimationEnd(Animator animation) {
-                                                  super.onAnimationEnd(animation);
-                                                  isAutoMove = false;
-                                              }
-                                          });
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                isAutoMove = false;
+            }
+        });
         valueAnimator.start();
     }
 
@@ -641,7 +666,7 @@ public class CalendarView extends View {
         }
         int i = (mInitTouchX - getPaddingLeft()) / mDayWidth;
         if (mCurMonth != null) {
-            mCurDay = mCurMonth.getWeek(j).getDay(i);
+            mCurDay = mCurMonth.getWeekList().get(j).getDayList().get(i);
             invalidate();
         }
     }

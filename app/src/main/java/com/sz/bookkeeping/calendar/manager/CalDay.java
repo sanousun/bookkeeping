@@ -20,8 +20,10 @@ public class CalDay {
 
     private static final String DATE_FORMAT = "yyyy-MM-dd";
 
-    private Solar solar;
-    private Lunar lunar;
+    //公历信息
+    private Solar mSolar;
+    //农历信息
+    private Lunar mLunar;
     //是否是今天
     private boolean isToday;
     //是否使能
@@ -30,6 +32,13 @@ public class CalDay {
     private boolean isMarked;
     //这天的特殊描述，节日或者农历
     private String mDayDescription;
+
+    public static CalDay getCalDay(Calendar calendar) {
+        int y = calendar.get(Calendar.YEAR);
+        int m = calendar.get(Calendar.MONTH) + 1;
+        int d = calendar.get(Calendar.DAY_OF_MONTH);
+        return new CalDay(y, m, d);
+    }
 
     public static CalDay getToday() {
         Calendar calendar = Calendar.getInstance();
@@ -40,31 +49,27 @@ public class CalDay {
     }
 
     public CalDay(int year, int month, int day) {
-        solar = new Solar();
-        solar.solarYear = year;
-        solar.solarMonth = month;
-        solar.solarDay = day;
-        lunar = LunarUtils.SolarToLunar(solar);
-        mDayDescription = LunarUtils.getDescriptionOfDay(solar, lunar);
+        mSolar = new Solar();
+        mSolar.solarYear = year;
+        mSolar.solarMonth = month;
+        mSolar.solarDay = day;
+        mLunar = LunarUtils.SolarToLunar(mSolar);
+        mDayDescription = LunarUtils.getDescriptionOfDay(mSolar, mLunar);
         isToday = CalendarUtils.isToday(year, month, day);
         isEnable = true;
         isMarked = false;
     }
 
     public Solar getSolar() {
-        return solar;
+        return mSolar;
     }
 
     public Lunar getLunar() {
-        return lunar;
+        return mLunar;
     }
 
     public boolean isToday() {
         return isToday;
-    }
-
-    public void setToday(boolean today) {
-        isToday = today;
     }
 
     public boolean isEnable() {
@@ -87,8 +92,16 @@ public class CalDay {
         return mDayDescription;
     }
 
-    public void setDayDescription(String dayDescription) {
-        mDayDescription = dayDescription;
+    /**
+     * 天数据结构的加减法
+     *
+     * @param date 加减的天数
+     * @return 天数据结构
+     */
+    public CalDay add(int date) {
+        Calendar calendar = mSolar.getCalendar();
+        calendar.add(Calendar.DATE, date);
+        return CalDay.getCalDay(calendar);
     }
 
     public CalDay pre() {
@@ -99,28 +112,47 @@ public class CalDay {
         return add(1);
     }
 
-    public CalDay add(int date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(solar.solarYear, solar.solarMonth - 1, solar.solarDay);
-        calendar.add(Calendar.DATE, date);
-        int y = calendar.get(Calendar.YEAR);
-        int m = calendar.get(Calendar.MONTH) + 1;
-        int d = calendar.get(Calendar.DAY_OF_MONTH);
-        return new CalDay(y, m, d);
+    public CalWeek getCalWeek() {
+        CalDay calDay = add(1 - getDayOfWeek());
+        Solar solar = calDay.getSolar();
+        return new CalWeek(solar.solarYear, solar.solarMonth, solar.solarDay, solar.solarMonth);
+    }
+
+    /**
+     * 有时候获取的周信息可能并不是当前月份的
+     * @param curMonth 当前月份
+     * @return 周信息
+     */
+    public CalWeek getCalWeek(int curMonth) {
+        CalDay calDay = add(1 - getDayOfWeek());
+        Solar solar = calDay.getSolar();
+        return new CalWeek(solar.solarYear, solar.solarMonth, solar.solarDay, curMonth);
+    }
+
+    public CalMonth getCalMonth() {
+        return new CalMonth(mSolar.solarYear, mSolar.solarMonth);
     }
 
     public int getMonth() {
-        return solar.solarMonth;
+        return mSolar.solarMonth;
     }
 
+    /**
+     * 星期一作为第一天，获取当前的日期是一个月中的第几个礼拜
+     * @return 第一个礼拜:0
+     */
     public int getWeekOfMonth() {
-        Calendar calendar = solar.getCalendar();
+        Calendar calendar = mSolar.getCalendar();
         calendar.setFirstDayOfWeek(Calendar.MONDAY);
         return calendar.get(Calendar.WEEK_OF_MONTH);
     }
 
+    /**
+     * 获取当前的日期是一个礼拜中的第几天
+     * @return 星期一:1; 星期天:7
+     */
     public int getDayOfWeek() {
-        Calendar calendar = solar.getCalendar();
+        Calendar calendar = mSolar.getCalendar();
         int day = calendar.get(Calendar.DAY_OF_WEEK) - 1;
         if (day == 0) {
             day = 7;
@@ -137,6 +169,7 @@ public class CalDay {
     }
 
     public static class Solar {
+
         public int solarDay;
         public int solarMonth;
         public int solarYear;
@@ -173,6 +206,6 @@ public class CalDay {
             return false;
         }
         CalDay calDay = (CalDay) obj;
-        return calDay.solar.equals(solar);
+        return calDay.mSolar.equals(mSolar);
     }
 }
