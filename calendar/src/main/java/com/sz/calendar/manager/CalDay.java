@@ -1,8 +1,8 @@
-package com.sz.bookkeeping.calendar.manager;
+package com.sz.calendar.manager;
 
 
-import com.sz.bookkeeping.calendar.util.CalendarUtils;
-import com.sz.bookkeeping.calendar.util.LunarUtils;
+import com.sz.calendar.util.CalendarUtils;
+import com.sz.calendar.util.LunarUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

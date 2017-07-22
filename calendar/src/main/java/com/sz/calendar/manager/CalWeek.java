@@ -1,4 +1,4 @@
-package com.sz.bookkeeping.calendar.manager;
+package com.sz.calendar.manager;
 
 import java.util.ArrayList;
 import java.util.List;

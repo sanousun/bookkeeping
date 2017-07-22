@@ -1,4 +1,4 @@
-package com.sz.bookkeeping.calendar.widget;
+package com.sz.calendar.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -11,17 +11,17 @@ import android.graphics.Paint;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-import com.sz.bookkeeping.R;
-import com.sz.bookkeeping.calendar.manager.CalDay;
-import com.sz.bookkeeping.calendar.manager.CalMonth;
-import com.sz.bookkeeping.calendar.manager.CalWeek;
-import com.sz.bookkeeping.util.LogUtil;
-import com.sz.bookkeeping.util.SizeUtils;
+import com.sz.calendar.R;
+import com.sz.calendar.manager.CalDay;
+import com.sz.calendar.manager.CalMonth;
+import com.sz.calendar.manager.CalWeek;
+import com.sz.calendar.util.SizeUtils;
 
 /**
  * Created with Android Studio.
@@ -32,6 +32,8 @@ import com.sz.bookkeeping.util.SizeUtils;
  */
 
 public class CalendarView extends View {
+
+    private static final String TAG = CalendarView.class.getSimpleName();
 
     //动画持续时间
     private static final int DURING_ANI = 300;
@@ -44,7 +46,7 @@ public class CalendarView extends View {
     //month的列数
     private static final int COLUMN_ITEM = 7;
     //month最大的行数，展开状态
-    private static final int MAX_ROW_ITEM = 6;
+    private static final int MAX_ROW_ITEM = 5;
     //month最小的行数，收缩状态
     private static final int MIN_ROW_ITEM = 1;
     //day视图的高度
@@ -111,7 +113,9 @@ public class CalendarView extends View {
         initView(context, attrs);
     }
 
-
+    /**
+     * 控件初始化工作
+     */
     private void initView(Context context, AttributeSet attrs) {
         mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
@@ -175,7 +179,7 @@ public class CalendarView extends View {
         mCurHeight = viewHeight - verticalSpace;
         mCurOffsetHorizontal = 0;
 
-        LogUtil.e("left:" + getPaddingLeft()
+        Log.i(TAG, "left:" + getPaddingLeft()
                 + ", right:" + getPaddingRight()
                 + ", top:" + getPaddingTop()
                 + ", bottom:" + getPaddingBottom());
@@ -331,8 +335,11 @@ public class CalendarView extends View {
         //隐藏行数大于等于被选中的行数，第一行是被选中的需要展示全部，其他行数需要做特殊处理
         else {
             //由于第一行中的元素被选中，需要对后面的行数进行特殊处理，距离view的top距离需要重新算，还要加上透明度
-            float rate = (mCurHeight - mDayHeight) * 1.0f
-                    / (mDayHeight * MAX_ROW_ITEM - (selectRow + 1) * mDayHeight);
+            //这是伸展区域高度
+            int expandH = mCurHeight - mDayHeight;
+            //这是最大时的高度
+            int maxH = mDayHeight * (MAX_ROW_ITEM - selectRow - 1);
+            float rate = expandH * 1f / maxH;
             drawMonthView2(canvas, selectRow, alpha, rate, mCurMonth);
         }
     }
@@ -384,7 +391,10 @@ public class CalendarView extends View {
             }
             //被选中的row上方的row需要特殊处理
             else {
-                startY = getPaddingTop() + (int) (mDayHeight * rate * (i - selectRow));
+                //初始距离top的距离
+                int initY = mDayHeight * (i - selectRow);
+                //乘上比例后距离top的距离
+                startY = getPaddingTop() + (int) (rate * initY);
             }
             for (int j = 0; j < calWeek.getDayList().size(); j++) {
                 int startX = getPaddingLeft() + mDayWidth * j + mCurOffsetHorizontal;
@@ -607,9 +617,7 @@ public class CalendarView extends View {
         }
 
         ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
-        valueAnimator.setInterpolator(new
-
-                LinearOutSlowInInterpolator());
+        valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
         valueAnimator.setDuration(DURING_ANI);
         valueAnimator.addUpdateListener(va -> {
             int target = (int) va.getAnimatedValue();
@@ -618,7 +626,6 @@ public class CalendarView extends View {
                     && !(mCurOffsetHorizontal == 0 && target == -maxWidth)) {
                 mCurOffsetHorizontal = target;
                 invalidate();
-                LogUtil.e(mCurOffsetHorizontal + "");
             }
         });
         valueAnimator.addListener(new AnimatorListenerAdapter() {

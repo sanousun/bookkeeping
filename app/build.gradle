@@ -33,4 +33,5 @@ dependencies {
     compile rootProject.ext.dependencies['rxjava']
     compile rootProject.ext.dependencies['rxandroid']
     compile rootProject.ext.dependencies['rxbinding']
+    compile project(':calendar')
 }

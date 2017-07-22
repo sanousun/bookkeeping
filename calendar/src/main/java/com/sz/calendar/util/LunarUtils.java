@@ -1,10 +1,9 @@
-package com.sz.bookkeeping.calendar.util;
+package com.sz.calendar.util;
 
 import android.util.SparseArray;
 
-import com.sz.bookkeeping.calendar.manager.CalDay.Lunar;
-import com.sz.bookkeeping.calendar.manager.CalDay.Solar;
-import com.sz.bookkeeping.util.StringUtils;
+import com.sz.calendar.manager.CalDay.Lunar;
+import com.sz.calendar.manager.CalDay.Solar;
 
 /**
  * Created with Android Studio.
