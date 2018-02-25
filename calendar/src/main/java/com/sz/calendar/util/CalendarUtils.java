@@ -4,11 +4,9 @@ package com.sz.calendar.util;
 import java.util.Calendar;
 
 /**
- * Created with Android Studio.
- * User: dashu
- * Date: 2017/2/15
- * Time: 下午4:39
- * Desc: 日历相关工具类
+ * @author dashu
+ * @date 2017/2/15
+ * 日历相关工具类
  */
 
 public class CalendarUtils {

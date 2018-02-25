@@ -9,11 +9,9 @@ import java.util.Calendar;
 import java.util.Locale;
 
 /**
- * Created with Android Studio.
- * User: dashu
- * Date: 2017/2/15
- * Time: 下午2:39
- * Desc: 天
+ * @author dashu
+ * @date 2017/2/15
+ * 天
  */
 
 public class CalDay {
@@ -114,6 +112,7 @@ public class CalDay {
 
     /**
      * 计算一周前的那一天
+     *
      * @return 一周前的那一天
      */
     public CalDay weekPre() {
@@ -122,6 +121,7 @@ public class CalDay {
 
     /**
      * 计算一周后的那一天
+     *
      * @return 一周后的那一天
      */
     public CalDay weekNext() {

@@ -1,11 +1,9 @@
 package com.sz.calendar.util;
 
 /**
- * Created with Android Studio.
- * User: dashu
- * Date: 2017/2/9
- * Time: 下午8:03
- * Desc: 字符串相关的工具类
+ * @author dashu
+ * @date 2017/2/9
+ * 字符串相关的工具类
  */
 
 @SuppressWarnings("unused")

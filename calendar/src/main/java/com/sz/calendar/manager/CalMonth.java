@@ -5,11 +5,9 @@ import java.util.Calendar;
 import java.util.List;
 
 /**
- * Created with Android Studio.
- * User: dashu
- * Date: 2017/2/15
- * Time: 下午2:39
- * Desc: 月
+ * @author dashu
+ * @date 2017/2/15
+ * 月
  */
 
 public class CalMonth {

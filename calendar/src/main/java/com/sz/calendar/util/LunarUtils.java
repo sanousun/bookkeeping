@@ -6,11 +6,9 @@ import com.sz.calendar.manager.CalDay.Lunar;
 import com.sz.calendar.manager.CalDay.Solar;
 
 /**
- * Created with Android Studio.
- * User: dashu
- * Date: 2017/2/13
- * Time: 下午2:18
- * Desc: 农历工具类
+ * @author dashu
+ * @date 2017/2/13
+ * 农历工具类
  */
 
 public class LunarUtils {

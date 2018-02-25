@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created with Android Studio.
- * User: dashu
- * Date: 2017/2/15
- * Time: 下午2:39
- * Desc: 周
+ * @author dashu
+ * @date 2017/2/15
+ * 周
  */
 
 public class CalWeek {

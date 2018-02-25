@@ -1,22 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="DayView">
-        <attr name="day_text" format="string"/>
-        <attr name="day_text_size" format="dimension"/>
-        <attr name="day_text_color" format="color"/>
-        <attr name="day_color_selected" format="color"/>
-        <attr name="desc_text" format="string"/>
-        <attr name="desc_text_size" format="dimension"/>
-        <attr name="desc_text_color" format="color"/>
-        <attr name="dot_size" format="dimension"/>
-        <attr name="dot_color" format="color"/>
-        <attr name="bg_color_today" format="color"/>
-        <attr name="bg_color_selected" format="color"/>
-        <attr name="bg_radius_size" format="dimension"/>
-    </declare-styleable>
-
-
     <declare-styleable name="CalendarView">
         <attr name="cal_day_text" format="string"/>
         <attr name="cal_day_text_size" format="dimension"/>
@@ -31,5 +15,4 @@
         <attr name="cal_bg_color_selected" format="color"/>
         <attr name="cal_bg_radius_size" format="dimension"/>
     </declare-styleable>
-
 </resources>

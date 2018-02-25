@@ -24,11 +24,9 @@ import com.sz.calendar.manager.CalWeek;
 import com.sz.calendar.util.SizeUtils;
 
 /**
- * Created with Android Studio.
- * User: dashu
- * Date: 2017/2/22
- * Time: 上午11:00
- * Desc: 日历控件
+ * @author dashu
+ * @date 2017/2/22
+ * 日历控件
  */
 
 public class CalendarView extends View {
@@ -195,7 +193,9 @@ public class CalendarView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         //根据curHeight获取视图状态
-        if (mCurMonth == null) return;
+        if (mCurMonth == null) {
+            return;
+        }
         if (mCurHeight == MAX_ROW_ITEM * mDayHeight) {
             mState = STATE_MONTH;
             drawViewWithoutExpandVertical(canvas);
@@ -503,6 +503,7 @@ public class CalendarView extends View {
             obtainVelocityTracker(ev);
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
+                    performClick();
                     isVerticalMoved = false;
                     isHorizontalMoved = false;
                     mInitTouchX = (int) (ev.getX() + 0.5f);
@@ -555,6 +556,11 @@ public class CalendarView extends View {
             }
         }
         return true;
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 
     private void obtainVelocityTracker(MotionEvent event) {
